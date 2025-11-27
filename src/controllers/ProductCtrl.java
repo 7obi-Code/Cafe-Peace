@@ -1,5 +1,6 @@
 package controllers;
 import modules.Invoice;
+import modules.Product;
 import modules.Alert;
 import modules.Stock;
 
@@ -16,7 +17,7 @@ public class ProductCtrl {
 	}
 	
 	public void confirmDeposit()	{
-		// Skal opdatere stock og tjekke om der skal ligges en alert
+		// Skal opdatere stock og tjekke om der skal (ligges en alert = metoden hedder checkMaxStock(Product p, int newQty))
 	}
 
 }

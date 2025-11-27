@@ -1,5 +1,7 @@
 package interfaces;
 
-public interface AlertDBIF {
+import modules.Alert;
 
+public interface AlertDBIF {
+	Alert createAlert(Alert alert) throws SQLException;
 }

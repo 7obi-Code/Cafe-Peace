@@ -3,14 +3,14 @@ import modules.Invoice;
 import modules.Product;
 import modules.Alert;
 import modules.Stock;
+import interfaces.ProductDBIF;
 
 
 public class ProductCtrl {
 	private InvoiceCtrl invoiceCtrl;
 	private AlertCtrl alertCtrl;
+	private ProductDBIF productDBIF;
 	
-	public ProductCtrl()	{
-	}
 
 	public Invoice insertInvoice(int invoiceNo)	{
 		invoiceCtrl.findInvoiceByNo(invoiceNo);

@@ -27,17 +27,28 @@ public class ProductDB implements ProductDBIF {
             int productId     = entry.getKey();
             int depositAmount = entry.getValue();
 
-            // Nuværende Stock + produkt
             Stock currentStock = stockDB.findStockByProductId(productId);
-            Product product    = currentStock.getProduct();
-            int newAmount      = currentStock.getAmount() + depositAmount;
+
+            int currentAmount = (currentStock != null) ? currentStock.getAmount() : 0;
+            int newAmount     = currentAmount + depositAmount;
 
             // Ny stock-record oprettes
-            stockDB.createStock(productId, newAmount, LocalDateTime.now().toString());
+            stockDB.createStock(productId, newAmount, LocalDateTime.now());
+
+            // Hent produktet gennem ProductDB (du er jo allerede inde i ProductDB)
+            Product product = findProductById(productId);
 
             result.put(product, newAmount);
         }
 
         return result;
     }
+    
+    public Product findProductById(int productId) throws SQLException, DataAccessException {
+		return null;
+        // SELECT * FROM Product WHERE productId = ?
+        // build and return Product
+    }
+    
+    
 }

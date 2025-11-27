@@ -25,10 +25,7 @@ public class StockDB implements StockDBIF {
             if (rs.next()) {
                 return buildStockFromResultSet(rs);
             } else {
-                // Hvis der ikke findes nogen record endnu, kan du selv vælge:
-                // 1) returnere null, eller
-                // 2) kaste en exception
-                return null;
+                return null; // eller kast en custom exception
             }
         } catch (SQLException e) {
             throw e;
@@ -36,14 +33,14 @@ public class StockDB implements StockDBIF {
     }
 
     @Override
-    public void createStock(int productId, int amount, String timestamp)
+    public void createStock(int productId, int amount, LocalDateTime timestamp)
             throws SQLException, DataAccessException {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             PreparedStatement ps = conn.prepareStatement(INSERT_STOCK);
             ps.setInt(1, productId);
             ps.setInt(2, amount);
-            ps.setString(3, timestamp);
+            ps.setTimestamp(3, Timestamp.valueOf(timestamp));
             ps.executeUpdate();
         } catch (SQLException e) {
             throw e;
@@ -51,12 +48,13 @@ public class StockDB implements StockDBIF {
     }
 
     private Stock buildStockFromResultSet(ResultSet rs) throws SQLException {
-        int id        = rs.getInt("id");         // hvis du har en PK
+        int stockId   = rs.getInt("stockId");
         int productId = rs.getInt("productId");
         int amount    = rs.getInt("amount");
         Timestamp ts  = rs.getTimestamp("timestamp");
 
-        // Tilpas
-        return new Stock(id, productId, amount, ts.toLocalDateTime());
+        LocalDateTime timestamp = ts.toLocalDateTime();
+
+        return new Stock(stockId, productId, amount, timestamp);
     }
 }

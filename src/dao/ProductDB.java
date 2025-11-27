@@ -24,7 +24,7 @@ public class ProductDB implements ProductDBIF {
         Map<Product, Integer> result = new HashMap<>();
 
         for (Map.Entry<Integer, Integer> entry : qtyByProductId.entrySet()) {
-            int productId = entry.getKey();
+            int productId     = entry.getKey();
             int depositAmount = entry.getValue();
 
             // Nuværende Stock + produkt

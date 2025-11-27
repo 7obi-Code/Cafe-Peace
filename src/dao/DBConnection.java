@@ -9,19 +9,19 @@ public class DBConnection {
 	private static DBConnection uniqueInstance; 	
 	private Connection connection = null; // the connection to the database
 	
-	private static final String DBNAME = "InternshipManagement";
-	private static final String SERVERNAME = "localhost";
+	private static final String DBNAME = "DMA-CSD-V252_10666009";
+	private static final String SERVERNAME = "hildur.ucn.dk";
 	private static final String PORTNUMBER = "1433";
-	private static final String USERNAME = "sa";
-	private static final String PASSWORD = "secret2025*";
+	private static final String USERNAME = "DMA-CSD-V252_10666009";
+	private static final String PASSWORD = "Password1!";
 
 	private DBConnection() throws DataAccessException {
-		String urlString = String.format("jdbc:sqlserver://%s:%s;databaseName=%s;encrypt=false", SERVERNAME, PORTNUMBER,
+		String urlString = String.format("jdbc:sqlserver://%s:%s;databaseName=%s;encrypt=true;trustServerCertificate=true", SERVERNAME, PORTNUMBER,
 				DBNAME);
 		try {
 			connection = DriverManager.getConnection(urlString, USERNAME, PASSWORD);
 		} catch (SQLException e) {
-			throw new DataAccessException(String.format("Could not connect to database %s@%s:%d user %s", DBNAME,
+			throw new DataAccessException(String.format("Could not connect to database %s@%s:%s user %s", DBNAME,
 					SERVERNAME, PORTNUMBER, USERNAME), e);
 		}
 	}

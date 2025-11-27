@@ -3,9 +3,9 @@ import interfaces.InvoiceDBIF;
 import modules.Invoice;
 
 public class InvoiceCtrl {
-	private InvoiceDBIF invoiceDPIF;
+	private InvoiceDBIF invoiceDBIF;
 	
 	public Invoice findInvoiceByNo(int invoiceNo)	{
-		invoiceDPIF.getInvoiceByNo(invoiceNo);
+		invoiceDBIF.getInvoiceByNo(invoiceNo);
 	}
 }

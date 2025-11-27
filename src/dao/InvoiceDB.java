@@ -5,41 +5,50 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 
-import db.DataAccessException;
+import dao.DataAccessException;
 import interfaces.InvoiceDBIF;
-import model.Employee;
+import modules.Product;
 import modules.Invoice;
+import modules.InvoiceLine;
 
 public class InvoiceDB implements InvoiceDBIF {
 	private ProductDB productDB;
 	
 	private static final String SELECT_ALL_INVOICES = 
-			"SELECT invoiceId, supPhone_FK, alert_FK, staff_FK FROM Invoice";
+			"SELECT invoiceNo, supPhone_FK, alert_FK, staff_FK FROM Invoice";
 	
-	private static final String SELECT_BY_INVOICENO = SELECT_ALL_INVOICES + " WHERE invoiceId = ?";
+	private static final String SELECT_BY_INVOICENO = SELECT_ALL_INVOICES + " WHERE invoiceNo = ?";
+	
+	private static final String SELECT_ALL_INVOICELINES =
+			"SELECT quantity, invoice_FK, product_FK FROM InvoiceLine";
+	
+	private static final String SELECT_INVOICELINE_BY_INVOICENO = SELECT_ALL_INVOICELINES + " WHERE invoice_FK = ?";
 	
 	private PreparedStatement selectByInvoiceNo;
+	private PreparedStatement selectInvoiceLinesByInvoiceNo;
 	
 	
 	public InvoiceDB() throws DataAccessException {
 		productDB = new ProductDB();
 		try {
 			selectByInvoiceNo = DBConnection.getInstance().getConnection().prepareStatement(SELECT_BY_INVOICENO);
+			selectInvoiceLinesByInvoiceNo = DBConnection.getInstance().getConnection().prepareStatement(SELECT_INVOICELINE_BY_INVOICENO);
 		} catch (SQLException e) {
-			throw new DataAccessException("Could not prepare statement",e);
+			throw new DataAccessException("Could not prepare statements",e);
 		}
 	}
 	
-	public Invoice getInvoiceByNo(int invoiceNo, boolean fullAssociation)	{
+	public Invoice getInvoiceByNo(int invoiceNo, boolean fullAssociation) throws DataAccessException {
 		try {
 			selectByInvoiceNo.setInt(1, invoiceNo);
 			ResultSet rs = selectByInvoiceNo.executeQuery();
-			Invoice e = buildObject(rs, fullAssociation);
-			return e;
+			Invoice i = buildObject(rs, fullAssociation);
+			return i;
 		} catch (SQLException e) {
-			throw new DataAccessException("Could not bind param or select employee by ID", e);
+			throw new DataAccessException("Could not find param or select invoice by No", e);
 		}
 	}
 	
@@ -51,20 +60,32 @@ public class InvoiceDB implements InvoiceDBIF {
 						rs.getInt("invoiceNo")
 						);
 				if(fullAssociation) {
-					
-					
-					i.setInvoiceLines(null);
-					//List<Vehicle> vehicles = vehicleDao.findByEmployeeId(e.getId());
-					//e.setVehicles(vehicles);
+					ArrayList<InvoiceLine> il = buildInvoiceLines(rs.getInt("invoiceNo"));
+					i.setInvoiceLines(il);
 				}
 			}
-		} catch (SQLException e1) {
-			throw new DataAccessException("Could not read result set for invoice", e1);
+		} catch (SQLException e) {
+			throw new DataAccessException("Could not read result set for invoice", e);
 		}
 		return i;
 	}
 	
-	private ArrayList<InvoiceLine> buildInvoiceLines() {
-		
+	private ArrayList<InvoiceLine> buildInvoiceLines(int invoiceNo) throws DataAccessException {
+		ArrayList<InvoiceLine> invoiceLines = new ArrayList<>();
+		try	{
+			selectInvoiceLinesByInvoiceNo.setInt(1, invoiceNo);
+			ResultSet rs = selectInvoiceLinesByInvoiceNo.executeQuery();
+			
+			while (rs.next())	{
+				Product product = productDB.getProductById(rs.getInt("product_FK"), true);
+				InvoiceLine il = new InvoiceLine(
+				rs.getInt("quantity"), product);
+			invoiceLines.add(il);
+			}
+			
+		} catch (SQLException e) {
+			throw new DataAccessException("Could not read invoicelines", e);
+		}
+		return invoiceLines;
 	}
 }

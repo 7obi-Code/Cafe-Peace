@@ -2,6 +2,8 @@ package dao;
 
 import interfaces.AlertDBIF;
 import modules.Alert;
+import java.sql.*;
+
 
 public class AlertDB implements AlertDBIF {
 	
@@ -10,7 +12,13 @@ public class AlertDB implements AlertDBIF {
 	
 	@Override
 	public Alert createAlert(Alert alert) throws SQLException {
-		Connection conn = DBConnection.getInstance().getConnection();
+		
+		Connection conn; try {
+		    conn = DBConnection.getInstance().getConnection();
+		} catch (DataAccessException e) {
+		    throw new SQLException("Could not get DB connection", e);
+		}
+	
         PreparedStatement ps = conn.prepareStatement(INSERT);
         ps.setString(1, alert.getType().name());
         ps.setString(2, alert.getDescription());

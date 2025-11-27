@@ -1,5 +1,7 @@
 package controllers;
 
+import java.sql.SQLException;
+
 import dao.AlertDB;
 import interfaces.AlertDBIF;
 import modules.Alert;
@@ -40,5 +42,4 @@ public class AlertCtrl {
 		}
 		return false;
 	}
-	
 }

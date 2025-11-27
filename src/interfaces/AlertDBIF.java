@@ -1,5 +1,6 @@
 package interfaces;
 
+import java.sql.SQLException;
 import modules.Alert;
 
 public interface AlertDBIF {

@@ -8,7 +8,7 @@ public class Product {
     private String expiryDate;
     private String unit;
     private String prodType;
-    private String supPhone;
+    private Supplier supplier;
     private int alertId;
 
     public Product(int productId, String name, int minStock, int maxStock, String expiryDate, String unit, String prodType) {
@@ -77,12 +77,12 @@ public class Product {
 		this.prodType = prodType;
 	}
 
-	public String getSupPhone() {
-		return supPhone;
+	public Supplier getSupplier() {
+		return supplier;
 	}
 
-	public void setSupPhone(String supPhone) {
-		this.supPhone = supPhone;
+	public void setSupPhone(String supplier) {
+		this.supplier = supplier;
 	}
 
 	public int getAlertId() {

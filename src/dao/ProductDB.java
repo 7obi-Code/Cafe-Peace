@@ -33,7 +33,7 @@ public class ProductDB implements ProductDBIF {
     		"SELECT productId_FK, hasSugar, size FROM Beverage WHERE productId_FK = ?";
 
     	private static final String SELECT_MEAT =
-    		"SELECT productId_FK, animal, weight WHERE productId_FK = ?";
+    		"SELECT productId_FK, animal, weight FROM Meat WHERE productId_FK = ?";
 	
 	private PreparedStatement selectById;
 	private PreparedStatement selectProduce;
@@ -107,6 +107,7 @@ public class ProductDB implements ProductDBIF {
 				
 				if (fullAssociation)	{
 					p = buildType(p);
+					p.setSupplier() FIX XD
 				}
 			}
 		} catch (SQLException e)	{
@@ -144,7 +145,7 @@ public class ProductDB implements ProductDBIF {
 					return base;
 			}
 		} catch (SQLException e) {
-			throw new DataAccessException("Could not load type for product", e);
+			throw new DataAccessException("Could not load type for products", e);
 		}
 	}
 	
@@ -165,7 +166,7 @@ public class ProductDB implements ProductDBIF {
                 );
             }
         } catch (SQLException e) {
-			throw new DataAccessException("Could not load type for product", e);
+			throw new DataAccessException("Could not load type for produce", e);
 		}
         return produce;
     }
@@ -187,7 +188,7 @@ public class ProductDB implements ProductDBIF {
                 );
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Could not load type for product", e);
+            throw new DataAccessException("Could not load type for product dryfoods", e);
         }
         return dryFoods;
     }
@@ -209,7 +210,7 @@ public class ProductDB implements ProductDBIF {
                 );
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Could not load type for product", e);
+            throw new DataAccessException("Could not load type for product beverage", e);
         }
         return beverage;
     }
@@ -231,7 +232,7 @@ public class ProductDB implements ProductDBIF {
                 );
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Could not load type for product", e);
+            throw new DataAccessException("Could not load type for product meat", e);
         }
         return meat;
     }

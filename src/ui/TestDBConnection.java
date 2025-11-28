@@ -26,9 +26,6 @@ public class TestDBConnection {
             Product p4 = productDB.findProductById(4, true); // assume ID 4 is Meat
             printProduct(p4);
 
-            Product p5 = productDB.findProductById(5, false); // base Product only
-            printProduct(p5);
-
         } catch (DataAccessException e) {
             e.printStackTrace();
         }
@@ -53,7 +50,7 @@ public class TestDBConnection {
             System.out.println("  Beverage Size: " + b.getSize() + ", HasSugar: " + b.HasSugar());
         } else if (p instanceof Meat) {
             Meat m = (Meat) p;
-            System.out.println("  Animal: " + ", Weight: ");
+            System.out.println("  Animal: " + m.getAnimal() + ", Weight: ");
         }
     }
 }

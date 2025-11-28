@@ -35,7 +35,7 @@ public class ProductDB implements ProductDBIF {
             // Ny stock-record oprettes
             stockDB.createStock(productId, newAmount, LocalDateTime.now());
 
-            // Hent produktet gennem ProductDB (du er jo allerede inde i ProductDB)
+            // Hent produktet gennem Product
             Product product = findProductById(productId);
 
             result.put(product, newAmount);

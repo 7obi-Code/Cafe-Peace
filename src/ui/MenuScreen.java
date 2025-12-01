@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Dimension;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -124,7 +127,7 @@ public class MenuScreen extends JFrame {
         return panel;
     }
 
-    // ---- Indlagre: Faktura-varer + Optælling i samme vindue ----
+ // ---- Indlagre: Faktura-varer + Optælling i samme vindue ----
     private JPanel createIndlagrePanel() {
         JPanel root = new JPanel(new BorderLayout(10, 10));
 
@@ -143,27 +146,49 @@ public class MenuScreen extends JFrame {
         // ---------- CENTER: To tabeller side om side ----------
         JPanel center = new JPanel(new GridLayout(1, 2, 10, 0)); // 1 række, 2 kolonner
 
-        // Venstre: Fakturavarer
+        // ========== VENSTRE: FAKTURAVARER ==========
         JPanel invoicePanel = new JPanel(new BorderLayout());
+
+        JPanel leftHeader = new JPanel(new BorderLayout());
         JLabel lblLeftTitle = new JLabel("Fakturavarer", SwingConstants.CENTER);
         lblLeftTitle.setFont(lblLeftTitle.getFont().deriveFont(16f));
-        invoicePanel.add(lblLeftTitle, BorderLayout.NORTH);
+        leftHeader.add(lblLeftTitle, BorderLayout.CENTER);
+        // fast højde så venstre og højre header matcher
+        leftHeader.setPreferredSize(new Dimension(1, 40));
+        invoicePanel.add(leftHeader, BorderLayout.NORTH);
 
         String[] invoiceColumns = { "Varenr", "Navn", "Faktura-antal", "Enhedspris" };
         invoiceModel = new DefaultTableModel(invoiceColumns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Faktura-data ændres normalt ikke her
+                return false;
             }
         };
         invoiceTable = new JTable(invoiceModel);
         invoicePanel.add(new JScrollPane(invoiceTable), BorderLayout.CENTER);
 
-        // Højre: Optælling
+        // ========== HØJRE: OPTÆLLING ==========
         JPanel countingPanel = new JPanel(new BorderLayout());
+
+        // Header: titel + grøn "Bekræft"-knap
+        JPanel rightHeader = new JPanel(new BorderLayout());
         JLabel lblRightTitle = new JLabel("Optælling", SwingConstants.CENTER);
         lblRightTitle.setFont(lblRightTitle.getFont().deriveFont(16f));
-        countingPanel.add(lblRightTitle, BorderLayout.NORTH);
+        rightHeader.add(lblRightTitle, BorderLayout.CENTER);
+
+        JButton btnConfirm = new JButton("Bekræft");
+        btnConfirm.setBackground(new Color(0, 180, 0));
+        btnConfirm.setForeground(Color.WHITE);
+        btnConfirm.setFocusPainted(false);
+
+        JPanel btnWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 7));
+        btnWrapper.setOpaque(false);
+        btnWrapper.add(btnConfirm);
+        rightHeader.add(btnWrapper, BorderLayout.EAST);
+
+        // samme faste højde som venstre header
+        rightHeader.setPreferredSize(new Dimension(1, 40));
+        countingPanel.add(rightHeader, BorderLayout.NORTH);
 
         String[] countingColumns = { "Varenr", "Navn", "System-antal", "Optalt antal" };
         countingModel = new DefaultTableModel(countingColumns, 0) {
@@ -193,8 +218,12 @@ public class MenuScreen extends JFrame {
         // ---------- Knap-action: Hent faktura ----------
         btnLoadInvoice.addActionListener(e -> loadInvoice());
 
+        // senere kan du koble btnConfirm til ProductCtrl.confirmDeposit()
+        // btnConfirm.addActionListener(e -> ...);
+
         return root;
     }
+
 
     // TODO: Kobl denne til jeres rigtige faktura-læsemetode
     private void loadInvoice() {

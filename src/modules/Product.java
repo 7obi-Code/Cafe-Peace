@@ -81,7 +81,7 @@ public class Product {
 		return supplier;
 	}
 
-	public void setSupPhone(String supplier) {
+	public void setSupplier(Supplier supplier) {
 		this.supplier = supplier;
 	}
 

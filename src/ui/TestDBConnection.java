@@ -1,56 +1,28 @@
 package ui;
-
-import dao.DataAccessException;
-import dao.ProductDB;
-import modules.Product;
-import modules.Produce;
-import modules.DryFoods;
-import modules.Beverages;
-import modules.Meat;
+import java.util.*;
+import modules.*;
+import interfaces.*;
+import dao.*;
 
 public class TestDBConnection {
-    public static void main(String[] args) {
-        try {
-            ProductDB productDB = new ProductDB();
+	private ProductDBIF productDB;
+	
+    public static void main(String[] args) throws DataAccessException {
+    	productDB = new ProductDB();
+        Product p = 
 
-            // Try loading different product IDs (replace with IDs that exist in your DB)
-            Product p1 = productDB.findProductById(1, true); // assume ID 1 is Produce
-            printProduct(p1);
 
-            Product p2 = productDB.findProductById(2, true); // assume ID 2 is DryFoods
-            printProduct(p2);
+        // Print product & supplier details
+        System.out.println("Product Details:");
+        System.out.println("ID: " + p.getProductId());
+        System.out.println("Name: " + p.getName());
+        System.out.println("Supplier: " + (p.getSupplier() != null ? p.getSupplier().getName() : "None"));
 
-            Product p3 = productDB.findProductById(3, true); // assume ID 3 is Beverage
-            printProduct(p3);
+        System.out.println("\nFull product object:");
+        System.out.println(p);
 
-            Product p4 = productDB.findProductById(4, true); // assume ID 4 is Meat
-            printProduct(p4);
-
-        } catch (DataAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void printProduct(Product p) {
-        if (p == null) {
-            System.out.println("No product found.");
-            return;
-        }
-
-        System.out.println("Loaded product: " + p.getName() + " (type=" + p.getProdType() + ")");
-
-        if (p instanceof Produce) {
-            Produce pr = (Produce) p;
-            System.out.println("  ProduceType: " + pr.getProduceType() + ", PackageSize: " + pr.getPackageSize());
-        } else if (p instanceof DryFoods) {
-            DryFoods df = (DryFoods) p;
-            System.out.println("  DryFoodsType: " + df.getDryFoodsType() + ", PackageSize: " + df.getPackageSize());
-        } else if (p instanceof Beverages) {
-            Beverages b = (Beverages) p;
-            System.out.println("  Beverage Size: " + b.getSize() + ", HasSugar: " + b.HasSugar());
-        } else if (p instanceof Meat) {
-            Meat m = (Meat) p;
-            System.out.println("  Animal: " + m.getAnimal() + ", Weight: ");
-        }
+        System.out.println("\nSupplier Details:");
+        System.out.println("Name: " + s.getName());
+        System.out.println("Phone: " + s.getPhone());
     }
 }

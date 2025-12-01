@@ -9,14 +9,18 @@ import modules.Beverages;
 import modules.DryFoods;
 import modules.Meat;
 import modules.Stock;
+import modules.Supplier;
+import interfaces.SupplierDBIF;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 public class ProductDB implements ProductDBIF {
     private final StockDBIF stockDB;
+    private final SupplierDBIF supplierDB;
     
     private static final String SELECT_ALL_PRODUCTS =
     		"SELECT productId, name, minStock, maxStock, expiryDate, unit, prodType, supPhone_FK, alert_FK FROM Product";
@@ -43,6 +47,7 @@ public class ProductDB implements ProductDBIF {
 
     public ProductDB() throws DataAccessException {
         this.stockDB = new StockDB();
+        this.supplierDB = new SupplierDB();
         try {
         	selectById = DBConnection.getInstance().getConnection().prepareStatement(SELECT_BY_ID);
         	selectProduce = DBConnection.getInstance().getConnection().prepareStatement(SELECT_PRODUCE);
@@ -55,12 +60,12 @@ public class ProductDB implements ProductDBIF {
     }
 
     @Override
-    public Map<Product, Integer> updateStock(Map<Integer, Integer> qtyByProductId)
+    public Map<Product, Integer> updateStock(Map<Integer, Integer> addedQtyToProductId)
             throws SQLException, DataAccessException {
 
         Map<Product, Integer> result = new HashMap<>();
 
-        for (Map.Entry<Integer, Integer> entry : qtyByProductId.entrySet()) {
+        for (Map.Entry<Integer, Integer> entry : addedQtyToProductId.entrySet()) {
             int productId     = entry.getKey();
             int depositAmount = entry.getValue();
 
@@ -73,7 +78,7 @@ public class ProductDB implements ProductDBIF {
             stockDB.createStock(productId, newAmount, LocalDateTime.now());
 
             // Hent produktet gennem Product
-            Product product = findProductById(productId);
+            Product product = findProductById(productId, true);
 
             result.put(product, newAmount);
         }
@@ -107,7 +112,8 @@ public class ProductDB implements ProductDBIF {
 				
 				if (fullAssociation)	{
 					p = buildType(p);
-					p.setSupplier() FIX XD
+					Supplier supplier = supplierDB.findSupplierByPhone(rs.getString("supPhone_FK"), false);
+					p.setSupplier(supplier);
 				}
 			}
 		} catch (SQLException e)	{

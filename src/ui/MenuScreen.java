@@ -20,6 +20,13 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+import controllers.InvoiceCtrl;
+import dao.DataAccessException;
+import modules.Invoice;
+import modules.InvoiceLine;
+import javax.swing.JOptionPane;
+
+
 public class MenuScreen extends JFrame {
 
     private static final long serialVersionUID = 1L;
@@ -36,6 +43,11 @@ public class MenuScreen extends JFrame {
     private DefaultTableModel countingModel;
     private JTextField txtInvoiceNumber;
 
+    //Kode implementering fields
+    private final InvoiceCtrl invoiceCtrl;
+
+    
+    
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
@@ -55,7 +67,10 @@ public class MenuScreen extends JFrame {
     }
 
     public MenuScreen() {
-        setTitle("Cafe Peace - Lagersystem");
+    	
+        this.invoiceCtrl = new InvoiceCtrl();
+        
+		setTitle("Cafe Peace - Lagersystem");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 500);
         setLocationRelativeTo(null);
@@ -157,7 +172,7 @@ public class MenuScreen extends JFrame {
         leftHeader.setPreferredSize(new Dimension(1, 40));
         invoicePanel.add(leftHeader, BorderLayout.NORTH);
 
-        String[] invoiceColumns = { "Varenr", "Navn", "Faktura-antal", "Enhedspris" };
+        String[] invoiceColumns = { "Varenr", "Navn", "Faktura-antal"};
         invoiceModel = new DefaultTableModel(invoiceColumns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -224,24 +239,72 @@ public class MenuScreen extends JFrame {
         return root;
     }
 
-
-    // TODO: Kobl denne til jeres rigtige faktura-læsemetode
+ // Loader faktura via controller og putter linjer i tabellerne
     private void loadInvoice() {
-        String invoiceNo = txtInvoiceNumber.getText().trim();
-        if (invoiceNo.isEmpty()) {
-            System.out.println("Ingen fakturanr indtastet");
+        String text = txtInvoiceNumber.getText().trim();
+        if (text.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Indtast et fakturanummer.",
+                    "Manglende input",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Ryd gamle rækker
-        invoiceModel.setRowCount(0);
-        countingModel.setRowCount(0);
+        int invoiceNo;
+        try {
+            invoiceNo = Integer.parseInt(text);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Fakturanummer skal være et tal.",
+                    "Ugyldigt fakturanummer",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-        // 🔧 DEMO-DATA (erstattes med data fra jeres faktura)
-        invoiceModel.addRow(new Object[] { "1001", "Eksempel vare A", 10, 25.00 });
-        invoiceModel.addRow(new Object[] { "1002", "Eksempel vare B", 5, 12.50 });
+        try {
+            Invoice invoice = invoiceCtrl.findInvoiceByNo(invoiceNo);
+            if (invoice == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Ingen faktura fundet med nummer: " + invoiceNo,
+                        "Ikke fundet",
+                        JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
 
-        countingModel.addRow(new Object[] { "1001", "Eksempel vare A", 100, null });
-        countingModel.addRow(new Object[] { "1002", "Eksempel vare B", 50, null });
+            // ryd gamle data
+            invoiceModel.setRowCount(0);
+            countingModel.setRowCount(0);
+
+            // udfyld tabeller ud fra fakturalinjerne
+            for (InvoiceLine line : invoice.getInvoiceLines()) {
+                var product = line.getProduct();
+
+                // fakturavarer (venstre tabel)
+                Object[] leftRow = {
+                        product.getProductId(),
+                        product.getName(),
+                        line.getQuantity(),
+             
+                };
+                invoiceModel.addRow(leftRow);
+
+                // optælling (højre tabel) – system-antal er ukendt her,
+                // I kan evt. hente det senere fra lageret.
+                Object[] rightRow = {
+                        product.getProductId(),
+                        product.getName(),
+                        null,   // System-antal (kan fyldes når I har stock-data)
+                        null    // Optalt antal (brugeren skriver selv)
+                };
+                countingModel.addRow(rightRow);
+            }
+
+        } catch (DataAccessException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Fejl ved hentning af faktura: " + ex.getMessage(),
+                    "Databasefejl",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

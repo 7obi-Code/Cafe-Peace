@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.util.HashMap;
+import java.util.Map;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Dimension;
@@ -21,6 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import controllers.InvoiceCtrl;
+import controllers.ProductCtrl;
 import dao.DataAccessException;
 import modules.Invoice;
 import modules.InvoiceLine;
@@ -45,6 +48,7 @@ public class MenuScreen extends JFrame {
 
     //Kode implementering fields
     private final InvoiceCtrl invoiceCtrl;
+    private final ProductCtrl productCtrl;
 
     
     
@@ -66,9 +70,10 @@ public class MenuScreen extends JFrame {
         });
     }
 
-    public MenuScreen() {
+    public MenuScreen() throws DataAccessException{
     	
         this.invoiceCtrl = new InvoiceCtrl();
+        this.productCtrl = new ProductCtrl();
         
 		setTitle("Cafe Peace - Lagersystem");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -234,7 +239,41 @@ public class MenuScreen extends JFrame {
         btnLoadInvoice.addActionListener(e -> loadInvoice());
 
         // senere kan du koble btnConfirm til ProductCtrl.confirmDeposit()
-        // btnConfirm.addActionListener(e -> ...);
+        btnConfirm.addActionListener(e -> {
+            HashMap<Integer, Integer> qtyByProductId = new HashMap<>();
+
+            // Loop through table rows
+            for (int i = 0; i < countingModel.getRowCount(); i++) {
+                Object prodIdObj = countingModel.getValueAt(i, 0); // Varenr (ProductId)
+                Object countedObj = countingModel.getValueAt(i, 3); // Optalt antal (User entered)
+
+                if (prodIdObj != null && countedObj != null) {
+                    try {
+                        int prodId = (Integer) prodIdObj;
+                        int countedQty = Integer.parseInt(countedObj.toString());
+                        qtyByProductId.put(prodId, countedQty);
+                    } catch (NumberFormatException err) {
+                        // Optionally, notify user about bad input, or just skip
+                        // JOptionPane.showMessageDialog(this, ...);
+                    }
+                }
+            }
+
+            // Call ProductCtrl to confirm deposit
+            try {
+                productCtrl.confirmDeposit(qtyByProductId);
+                JOptionPane.showMessageDialog(this,
+                    "Lager opdateret med optalte antal!",
+                    "Succes",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this,
+                    "Fejl ved opdatering af lager: " + ex.getMessage(),
+                    "Fejl",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         return root;
     }
@@ -262,7 +301,7 @@ public class MenuScreen extends JFrame {
         }
 
         try {
-            Invoice invoice = invoiceCtrl.findInvoiceByNo(invoiceNo);
+            Invoice invoice = productCtrl.insertInvoice(invoiceNo);
             if (invoice == null) {
                 JOptionPane.showMessageDialog(this,
                         "Ingen faktura fundet med nummer: " + invoiceNo,
@@ -293,7 +332,7 @@ public class MenuScreen extends JFrame {
                 Object[] rightRow = {
                         product.getProductId(),
                         product.getName(),
-                        null,   // System-antal (kan fyldes når I har stock-data)
+                        product.getStock().getAmount(),
                         null    // Optalt antal (brugeren skriver selv)
                 };
                 countingModel.addRow(rightRow);

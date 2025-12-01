@@ -1,15 +1,17 @@
 package ui;
+import java.sql.SQLException;
 import java.util.*;
 import modules.*;
 import interfaces.*;
 import dao.*;
 
+
 public class TestDBConnection {
-	private ProductDBIF productDB;
 	
-    public static void main(String[] args) throws DataAccessException {
-    	productDB = new ProductDB();
-        Product p = 
+    public static void main(String[] args) throws DataAccessException, SQLException {
+    	ProductDBIF productDB = new ProductDB();
+        int productId = 1;
+    	Product p = productDB.findProductById(1, true);
 
 
         // Print product & supplier details
@@ -22,7 +24,10 @@ public class TestDBConnection {
         System.out.println(p);
 
         System.out.println("\nSupplier Details:");
-        System.out.println("Name: " + s.getName());
-        System.out.println("Phone: " + s.getPhone());
+        System.out.println("Name: " + p.getSupplier().getName());
+        System.out.println("Phone: " + p.getSupplier().getPhone());
+        System.out.println("Email: " + p.getSupplier().getEmail());
+
+        System.out.println("Amount: " + p.getStock().getAmount());
     }
 }

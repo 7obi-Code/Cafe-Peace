@@ -114,6 +114,8 @@ public class ProductDB implements ProductDBIF {
 					p = buildType(p);
 					Supplier supplier = supplierDB.findSupplierByPhone(rs.getString("supPhone_FK"), false);
 					p.setSupplier(supplier);
+					Stock stock = stockDB.findStockByProductId(rs.getInt("productId"));
+					p.setStock(stock);
 				}
 			}
 		} catch (SQLException e)	{

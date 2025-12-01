@@ -9,6 +9,7 @@ public class Product {
     private String unit;
     private String prodType;
     private Supplier supplier;
+    private Stock stock;
     private int alertId;
 
     public Product(int productId, String name, int minStock, int maxStock, String expiryDate, String unit, String prodType) {
@@ -51,6 +52,14 @@ public class Product {
 
 	public void setMaxStock(int maxStock) {
 		this.maxStock = maxStock;
+	}
+	
+	public Stock getStock() {
+		return stock;
+	}
+
+	public void setStock(Stock stock) {
+		this.stock = stock;
 	}
 
 	public String getExpiryDate() {

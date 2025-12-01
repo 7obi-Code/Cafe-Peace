@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class StockDB implements StockDBIF {
 
     private static final String SELECT_BY_PRODUCTID =
-        "SELECT TOP 1 * FROM Stock WHERE productId = ? ORDER BY timestamp DESC";
+        "SELECT TOP 1 * FROM Stock WHERE product_FK = ? ORDER BY timestamp DESC";
 
     private static final String INSERT_STOCK =
         "INSERT INTO Stock (productId, amount, timestamp) VALUES (?, ?, ?)";
@@ -49,12 +49,9 @@ public class StockDB implements StockDBIF {
 
     private Stock buildStockFromResultSet(ResultSet rs) throws SQLException {
         int stockId   = rs.getInt("stockId");
-        int productId = rs.getInt("productId");
+        int productId = rs.getInt("product_FK");
         int amount    = rs.getInt("amount");
-        Timestamp ts  = rs.getTimestamp("timestamp");
 
-        LocalDateTime timestamp = ts.toLocalDateTime();
-
-        return new Stock(stockId, productId, amount, timestamp);
+        return new Stock(stockId, productId, amount);
     }
 }

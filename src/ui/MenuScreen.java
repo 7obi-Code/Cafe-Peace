@@ -45,6 +45,7 @@ public class MenuScreen extends JFrame {
     private DefaultTableModel invoiceModel;
     private DefaultTableModel countingModel;
     private JTextField txtInvoiceNumber;
+    private JTextField txtStaffNumber;
 
     //Kode implementering fields
     private final InvoiceCtrl invoiceCtrl;
@@ -263,7 +264,7 @@ public class MenuScreen extends JFrame {
         // ========== HØJRE: OPTÆLLING ==========
         JPanel countingPanel = new JPanel(new BorderLayout());
 
-        // Header: titel + grøn "Bekræft"-knap
+     // Header: titel + medarbejdernr-felt + grøn "Bekræft"-knap
         JPanel rightHeader = new JPanel(new BorderLayout());
         JLabel lblRightTitle = new JLabel("Optælling", SwingConstants.CENTER);
         lblRightTitle.setFont(lblRightTitle.getFont().deriveFont(16f));
@@ -274,13 +275,22 @@ public class MenuScreen extends JFrame {
         btnConfirm.setForeground(Color.WHITE);
         btnConfirm.setFocusPainted(false);
 
+        // Panel til medarbejdernr + knap (samme højde, ingen ændring)
         JPanel btnWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 7));
         btnWrapper.setOpaque(false);
+
+        JLabel lblStaff = new JLabel("Medarbejdernr:");
+        txtStaffNumber = new JTextField(8);   // samme stil som fakturanr, bare kortere
+
+        btnWrapper.add(lblStaff);
+        btnWrapper.add(txtStaffNumber);
         btnWrapper.add(btnConfirm);
+
         rightHeader.add(btnWrapper, BorderLayout.EAST);
 
         // samme faste højde som venstre header
         rightHeader.setPreferredSize(new Dimension(1, 40));
+
         countingPanel.add(rightHeader, BorderLayout.NORTH);
 
         String[] countingColumns = { "Varenr", "Navn", "System-antal", "Optalt antal" };
@@ -313,12 +323,33 @@ public class MenuScreen extends JFrame {
 
         // senere kan du koble btnConfirm til ProductCtrl.confirmDeposit()
         btnConfirm.addActionListener(e -> {
+            // --- Tjek medarbejdernr først ---
+            String staffText = txtStaffNumber.getText().trim();
+            if (staffText.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Indtast et medarbejdernr.",
+                    "Manglende input",
+                    JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int staffNumber;
+            try {
+                staffNumber = Integer.parseInt(staffText);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this,
+                    "Medarbejdernr skal være et tal.",
+                    "Ugyldigt medarbejdernr",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             HashMap<Integer, Integer> qtyByProductId = new HashMap<>();
 
             // Loop through table rows
             for (int i = 0; i < countingModel.getRowCount(); i++) {
-                Object prodIdObj = countingModel.getValueAt(i, 0); // Varenr (ProductId)
-                Object countedObj = countingModel.getValueAt(i, 3); // Optalt antal (User entered)
+                Object prodIdObj = countingModel.getValueAt(i, 0); // Varenr
+                Object countedObj = countingModel.getValueAt(i, 3); // Optalt antal
 
                 if (prodIdObj != null && countedObj != null) {
                     try {
@@ -326,17 +357,18 @@ public class MenuScreen extends JFrame {
                         int countedQty = Integer.parseInt(countedObj.toString());
                         qtyByProductId.put(prodId, countedQty);
                     } catch (NumberFormatException err) {
-                        // Optionally, notify user about bad input, or just skip
-                        // JOptionPane.showMessageDialog(this, ...);
+                        // evt. besked til brugeren
                     }
                 }
             }
 
-            // Call ProductCtrl to confirm deposit
+            // TODO: brug staffNumber i ProductCtrl, når I er klar til det
+            // f.eks. productCtrl.confirmDeposit(qtyByProductId, staffNumber);
+
             try {
                 productCtrl.confirmDeposit(qtyByProductId);
                 JOptionPane.showMessageDialog(this,
-                    "Lager opdateret med optalte antal!",
+                    "Lager opdateret med optalte antal for medarbejder " + staffNumber + "!",
                     "Succes",
                     JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
@@ -347,6 +379,7 @@ public class MenuScreen extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
             }
         });
+
 
         return indlagrePanel;
     }

@@ -17,11 +17,11 @@ public class Alert {
 		}
 		
 		
-		public Alert(Type type, String description, Severity severity) {
-			this.setType(type);
-			this.setDescription(description);
-			this.setSeverity(severity);
-			this.setTimestamp(LocalDateTime.now());
+		public Alert(Type type, String description, Severity severity, LocalDateTime timestamp) {
+			this.type = type;
+			this.description = description;
+			this.severity = severity;
+			this.timestamp = timestamp;
 		}
 
 

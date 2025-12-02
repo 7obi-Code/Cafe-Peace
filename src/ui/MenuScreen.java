@@ -379,8 +379,6 @@ public class MenuScreen extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
             }
         });
-
-
         return indlagrePanel;
     }
 

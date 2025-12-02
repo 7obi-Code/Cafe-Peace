@@ -1,6 +1,7 @@
 package controllers;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 import dao.AlertDB;
 import interfaces.AlertDBIF;
@@ -16,8 +17,8 @@ public class AlertCtrl {
 	}
 	
 	//Opretter en ny alert og gemmer den som aktiv
-	public Alert createAlert(Alert.Type type, String description, Alert.Severity severity) throws SQLException {
-	    Alert alert = new Alert(type, description, severity);
+	public Alert createAlert(Alert.Type type, String description, Alert.Severity severity, LocalDateTime timestamp) throws SQLException {
+	    Alert alert = new Alert(type, description, severity, timestamp);
 	    return alertDB.createAlert(alert); // save to DB
 	}
 
@@ -26,7 +27,8 @@ public class AlertCtrl {
 	    if (newQty <= p.getMinStock()) {
 	        createAlert(Alert.Type.LOW_STOCK, 
 	                    p.getName() + " er nået lavt lager.", 
-	                    Alert.Severity.HØJ);
+	                    Alert.Severity.HØJ,
+	                    LocalDateTime.now());
 	        return true;
 	    }
 	    return false;
@@ -34,10 +36,11 @@ public class AlertCtrl {
 
 	//Checker om produkt er ramt maximum stock, og kaster en advarsel hvis den er ramt maximum stock
 	public boolean checkMaxStock(Product p, int newQty) throws SQLException {
-		if (newQty >= p.getMaxStock()) {
+		if (newQty > p.getMaxStock()) {
 			createAlert(Alert.Type.MAX_STOCK, 
 					p.getName() + " er nået grænsen for lager.",
-					Alert.Severity.LAV);
+					Alert.Severity.LAV,
+					LocalDateTime.now());
 			return true;
 		}
 		return false;

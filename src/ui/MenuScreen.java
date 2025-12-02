@@ -114,7 +114,7 @@ public class MenuScreen extends JFrame {
         contentPane.add(cardPanel, BorderLayout.CENTER);
 
         // Register "screens"
-        cardPanel.add(createLabelPanel("Aflagre Varer - skærm"), "AFLAGRE");
+        cardPanel.add(createAflagrePanel(),"AFLAGRE");
         cardPanel.add(createIndlagrePanel(), "INDLAGRE");
         cardPanel.add(createLabelPanel("Lageroversigt - skærm"), "LAGER");
         cardPanel.add(createLabelPanel("Indkøbsliste - skærm"), "ORDER");
@@ -147,9 +147,82 @@ public class MenuScreen extends JFrame {
         return panel;
     }
 
- // ---- Indlagre: Faktura-varer + Optælling i samme vindue ----
+ // --AflagerPanel--
+    private JPanel createAflagrePanel() {
+    	JPanel aflagerPanel = new JPanel(new BorderLayout(10, 10));
+		
+    	// TOP: Titel (du kan senere lave søgefelter, dato osv.)
+        JLabel lblTitle = new JLabel("Aflagre varer", SwingConstants.CENTER);
+        lblTitle.setFont(lblTitle.getFont().deriveFont(18f));
+        aflagerPanel.add(lblTitle, BorderLayout.NORTH);
+
+        // CENTER: To tabeller side om side (samme idé som Indlagre)
+        JPanel center = new JPanel(new GridLayout(1, 2, 10, 0));
+
+        // Venstre: Lageroversigt (hvad har vi lige nu)
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        JLabel lblLeft = new JLabel("Lager (til rådighed)", SwingConstants.CENTER);
+        lblLeft.setFont(lblLeft.getFont().deriveFont(16f));
+        leftPanel.add(lblLeft, BorderLayout.NORTH);
+
+        String[] leftCols = { "Varenr", "Navn", "Nuværende antal" };
+        DefaultTableModel stockModel = new DefaultTableModel(leftCols, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // lagerlisten ændres ikke direkte her
+            }
+        };
+        JTable stockTable = new JTable(stockModel);
+        leftPanel.add(new JScrollPane(stockTable), BorderLayout.CENTER);
+
+        // Højre: Aflagte varer (dem vi “bruger”/afskriver)
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        JLabel lblRight = new JLabel("Aflagte varer", SwingConstants.CENTER);
+        lblRight.setFont(lblRight.getFont().deriveFont(16f));
+        rightPanel.add(lblRight, BorderLayout.NORTH);
+
+        String[] rightCols = { "Varenr", "Navn", "Aflagret antal" };
+        DefaultTableModel usedModel = new DefaultTableModel(rightCols, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // kun Aflagret antal må ændres
+                return column == 2;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                return columnIndex == 2 ? Integer.class : String.class;
+            }
+        };
+        JTable usedTable = new JTable(usedModel);
+        rightPanel.add(new JScrollPane(usedTable), BorderLayout.CENTER);
+
+        center.add(leftPanel);
+        center.add(rightPanel);
+
+        aflagerPanel.add(center, BorderLayout.CENTER);
+
+        // BUND: Bekræft-knap til at gemme aflagring (kan kobles til controller senere)
+        JButton btnConfirmAflagre = new JButton("Bekræft aflagring");
+        btnConfirmAflagre.setBackground(new Color(180, 0, 0));
+        btnConfirmAflagre.setForeground(Color.WHITE);
+        btnConfirmAflagre.setFocusPainted(false);
+
+        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bottom.add(btnConfirmAflagre);
+        aflagerPanel.add(bottom, BorderLayout.SOUTH);
+
+        // TODO: senere koble btnConfirmAflagre til AflagreCtrl / ProductCtrl
+        // btnConfirmAflagre.addActionListener(e -> ...);
+
+    	return aflagerPanel;
+    }
+    
+    
+    
+ // --IndlagerPanel--
     private JPanel createIndlagrePanel() {
-        JPanel root = new JPanel(new BorderLayout(10, 10));
+        JPanel indlagrePanel = new JPanel(new BorderLayout(10, 10));
 
         // ---------- TOP: Faktura-nummer + knap ----------
         JPanel top = new JPanel();
@@ -161,7 +234,7 @@ public class MenuScreen extends JFrame {
         top.add(txtInvoiceNumber);
         top.add(btnLoadInvoice);
 
-        root.add(top, BorderLayout.NORTH);
+        indlagrePanel.add(top, BorderLayout.NORTH);
 
         // ---------- CENTER: To tabeller side om side ----------
         JPanel center = new JPanel(new GridLayout(1, 2, 10, 0)); // 1 række, 2 kolonner
@@ -233,7 +306,7 @@ public class MenuScreen extends JFrame {
         center.add(invoicePanel);
         center.add(countingPanel);
 
-        root.add(center, BorderLayout.CENTER);
+        indlagrePanel.add(center, BorderLayout.CENTER);
 
         // ---------- Knap-action: Hent faktura ----------
         btnLoadInvoice.addActionListener(e -> loadInvoice());
@@ -275,7 +348,7 @@ public class MenuScreen extends JFrame {
             }
         });
 
-        return root;
+        return indlagrePanel;
     }
 
  // Loader faktura via controller og putter linjer i tabellerne

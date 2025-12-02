@@ -12,7 +12,7 @@ public class StockDB implements StockDBIF {
         "SELECT TOP 1 * FROM Stock WHERE product_FK = ? ORDER BY timestamp DESC";
 
     private static final String INSERT_STOCK =
-        "INSERT INTO Stock (amount, product_FK, staff_FK) VALUES (?, ?, ?)";
+        "INSERT INTO Stock (amount, product_FK, staff_FK, timestamp) VALUES (?, ?, ?, ?)";
 
     @Override
     public Stock findStockByProductId(int productId) throws SQLException, DataAccessException {
@@ -41,6 +41,7 @@ public class StockDB implements StockDBIF {
             ps.setInt(1, amount);
             ps.setInt(2, productId);
             ps.setInt(3, 1001);
+            ps.setObject(4, timestamp);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw e;
@@ -51,7 +52,8 @@ public class StockDB implements StockDBIF {
         int stockId   = rs.getInt("stockId");
         int productId = rs.getInt("product_FK");
         int amount    = rs.getInt("amount");
+        LocalDateTime timestamp = rs.getObject("timestamp", LocalDateTime.class);
 
-        return new Stock(stockId, productId, amount);
+        return new Stock(stockId, productId, amount, timestamp);
     }
 }

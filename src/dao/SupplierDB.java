@@ -9,7 +9,7 @@ import modules.Supplier;
 public class SupplierDB implements SupplierDBIF {
 	
     private static final String SELECT_ALL_SUPPLIERS =
-    		"SELECT phone, name, addressId, email, cvr FROM Supplier";
+    		"SELECT phone, name, addressId_FK, email, cvr FROM Supplier";
 
     private static final String SELECT_BY_PHONE = SELECT_ALL_SUPPLIERS + " WHERE phone = ?";
 
@@ -40,7 +40,7 @@ public class SupplierDB implements SupplierDBIF {
 				s = new Supplier(
 						rs.getString("phone"),
 						rs.getString("name"),
-						rs.getInt("addressId"),
+						rs.getInt("addressId_FK"),
 						rs.getString("email"),
 						rs.getInt("cvr")
 				);

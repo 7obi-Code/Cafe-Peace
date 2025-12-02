@@ -23,7 +23,7 @@ public class ProductDB implements ProductDBIF {
     private final SupplierDBIF supplierDB;
     
     private static final String SELECT_ALL_PRODUCTS =
-    		"SELECT productId, name, minStock, maxStock, expiryDate, unit, prodType, supPhone_FK, alert_FK FROM Product";
+    		"SELECT productId, name, minStock, maxStock, expiryDate, unit, prodType, supPhone_FK FROM Product";
 
     	private static final String SELECT_BY_ID = SELECT_ALL_PRODUCTS + " WHERE productId = ?";
 

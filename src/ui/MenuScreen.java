@@ -149,7 +149,7 @@ public class MenuScreen extends JFrame {
 
  // ---- Indlagre: Faktura-varer + Optælling i samme vindue ----
     private JPanel createIndlagrePanel() {
-        JPanel root = new JPanel(new BorderLayout(10, 10));
+        JPanel indlagrePanel = new JPanel(new BorderLayout(10, 10));
 
         // ---------- TOP: Faktura-nummer + knap ----------
         JPanel top = new JPanel();
@@ -161,7 +161,7 @@ public class MenuScreen extends JFrame {
         top.add(txtInvoiceNumber);
         top.add(btnLoadInvoice);
 
-        root.add(top, BorderLayout.NORTH);
+        indlagrePanel.add(top, BorderLayout.NORTH);
 
         // ---------- CENTER: To tabeller side om side ----------
         JPanel center = new JPanel(new GridLayout(1, 2, 10, 0)); // 1 række, 2 kolonner
@@ -233,7 +233,7 @@ public class MenuScreen extends JFrame {
         center.add(invoicePanel);
         center.add(countingPanel);
 
-        root.add(center, BorderLayout.CENTER);
+        indlagrePanel.add(center, BorderLayout.CENTER);
 
         // ---------- Knap-action: Hent faktura ----------
         btnLoadInvoice.addActionListener(e -> loadInvoice());
@@ -275,7 +275,7 @@ public class MenuScreen extends JFrame {
             }
         });
 
-        return root;
+        return indlagrePanel;
     }
 
  // Loader faktura via controller og putter linjer i tabellerne

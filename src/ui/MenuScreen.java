@@ -28,35 +28,32 @@ import dao.DataAccessException;
 import modules.Invoice;
 import modules.InvoiceLine;
 
-
 public class MenuScreen extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
     private JPanel contentPane;
-    private JPanel menuPanel;     // the hide/show bar with buttons
-    private JPanel cardPanel;     // center area with screens
+    private JPanel menuPanel;     // Hide/show top bar med knapperne
+    private JPanel cardPanel;     // Center området med paneler
     private CardLayout cardLayout;
 
     // ---- Indlagre-felter ----
-    private JTable invoiceTable;
-    private JTable countingTable;
-    private DefaultTableModel invoiceModel;
-    private DefaultTableModel countingModel;
-    private JTextField txtInvoiceNumber;
-    private JTextField txtStaffNumber;
+    private JTable invoiceTable;      // Venstre
+    private JTable countingTable;     // Højre
+    private DefaultTableModel invoiceModel;   // Venstre
+    private DefaultTableModel countingModel;  // Højre
+    private JTextField txtInvoiceNumber;      // Invoice Field
+    private JTextField txtStaffNumber;        // Medlemsnummer Field
 
-    //Kode implementering fields
+    // Kode implementering fields
     @SuppressWarnings("unused")
-	private final InvoiceCtrl invoiceCtrl;
+    private final InvoiceCtrl invoiceCtrl;
     private final ProductCtrl productCtrl;
 
-    
-    
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
-                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) { //Nimbus UI Skin
                     if ("Nimbus".equals(info.getName())) {
                         UIManager.setLookAndFeel(info.getClassName());
                         break;
@@ -71,13 +68,12 @@ public class MenuScreen extends JFrame {
         });
     }
 
-    																										//TopMenu Start.
-    public MenuScreen() throws DataAccessException{
-    	
+    																								// TopMenu Start
+    public MenuScreen() throws DataAccessException {
         this.invoiceCtrl = new InvoiceCtrl();
         this.productCtrl = new ProductCtrl();
-        
-		setTitle("Cafe Peace - Lagersystem");
+
+        setTitle("Cafe Peace - Lagersystem");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 500);
         setLocationRelativeTo(null);
@@ -116,10 +112,8 @@ public class MenuScreen extends JFrame {
         contentPane.add(cardPanel, BorderLayout.CENTER);
 
         // Register "screens"
-        cardPanel.add(createAflagrePanel(),"AFLAGRE");
+        cardPanel.add(createAflagrePanel(), "AFLAGRE");
         cardPanel.add(createIndlagrePanel(), "INDLAGRE");
-        cardPanel.add(createLabelPanel("Lageroversigt - skærm"), "LAGER");
-        cardPanel.add(createLabelPanel("Indkøbsliste - skærm"), "ORDER");
 
         // Button actions (tabs)
         btnAflagre.addActionListener(e -> cardLayout.show(cardPanel, "AFLAGRE"));
@@ -137,25 +131,13 @@ public class MenuScreen extends JFrame {
             topPanel.repaint();
         });
     }
-    																									//TopMenu Slut.
-    
-    //Ikke helt sikker på hvad dette gør????
-    private JPanel createLabelPanel(String text) {
-        JPanel panel = new JPanel(new BorderLayout());
-        JLabel label = new JLabel(text, SwingConstants.CENTER);
-        label.setFont(label.getFont().deriveFont(20f));
-        panel.add(label, BorderLayout.CENTER);
-        return panel;
-    }
+    																								// TopMenu Slut
+
     
     
-    
-    
-    
-    
-    																							//IndlagrePanel Start.
+    																								// IndlagrePanel Start
     @SuppressWarnings("serial")
-	private JPanel createIndlagrePanel() {
+    private JPanel createIndlagrePanel() {
         JPanel indlagrePanel = new JPanel(new BorderLayout(10, 10));
 
         // ---------- TOP: Faktura-nummer + knap ----------
@@ -184,7 +166,7 @@ public class MenuScreen extends JFrame {
         leftHeader.setPreferredSize(new Dimension(1, 40));
         invoicePanel.add(leftHeader, BorderLayout.NORTH);
 
-        String[] invoiceColumns = { "Varenr", "Navn", "Faktura-antal"};
+        String[] invoiceColumns = { "Varenr", "Navn", "Faktura-antal" };
         invoiceModel = new DefaultTableModel(invoiceColumns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -197,7 +179,7 @@ public class MenuScreen extends JFrame {
         // ========== HØJRE: OPTÆLLING ==========
         JPanel countingPanel = new JPanel(new BorderLayout());
 
-     // Header: titel + medarbejdernr-felt + grøn "Bekræft"-knap
+        // Header: titel + medarbejdernr-felt + grøn "Bekræft"-knap
         JPanel rightHeader = new JPanel(new BorderLayout());
         JLabel lblRightTitle = new JLabel("Optælling", SwingConstants.CENTER);
         lblRightTitle.setFont(lblRightTitle.getFont().deriveFont(16f));
@@ -213,7 +195,7 @@ public class MenuScreen extends JFrame {
         btnWrapper.setOpaque(false);
 
         JLabel lblStaff = new JLabel("Medarbejdernr:");
-        txtStaffNumber = new JTextField(8);   //Medarbejdernummer field.
+        txtStaffNumber = new JTextField(8);   // Medarbejdernummer field.
 
         btnWrapper.add(lblStaff);
         btnWrapper.add(txtStaffNumber);
@@ -254,31 +236,36 @@ public class MenuScreen extends JFrame {
         // ---------- Knap-action: Hent faktura ----------
         btnLoadInvoice.addActionListener(e -> loadInvoice());
 
-        
         btnConfirm.addActionListener(e -> {
             // --- Tjek medarbejdernr først ---
             String staffText = txtStaffNumber.getText().trim();
             if (staffText.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                    "Indtast et medarbejdernr.",
-                    "Manglende input",
-                    JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Indtast et medarbejdernr.",
+                        "Manglende input",
+                        JOptionPane.WARNING_MESSAGE
+                );
                 return;
-                
-            } int staffNumber; try {
-            	
-                staffNumber = Integer.parseInt(staffText); //Checker om staffnummeret er ugyldigt.
+            }
+
+            int staffNumber;
+            try {
+                // Checker om staffnummeret er ugyldigt.
+                staffNumber = Integer.parseInt(staffText);
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this,
-                    "Medarbejdernr skal være et tal.",
-                    "Ugyldigt medarbejdernr",
-                    JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Medarbejdernr skal være et tal.",
+                        "Ugyldigt medarbejdernr",
+                        JOptionPane.ERROR_MESSAGE
+                );
                 return;
             }
 
             HashMap<Integer, Integer> qtyByProductId = new HashMap<>();
 
-            //Loop through table rows
+            // Loop through table rows
             for (int i = 0; i < countingModel.getRowCount(); i++) {
                 Object prodIdObj = countingModel.getValueAt(i, 0); // Varenr
                 Object countedObj = countingModel.getValueAt(i, 3); // Optalt antal
@@ -288,42 +275,48 @@ public class MenuScreen extends JFrame {
                         int prodId = (Integer) prodIdObj;
                         int countedQty = Integer.parseInt(countedObj.toString());
                         qtyByProductId.put(prodId, countedQty);
-                    } catch (NumberFormatException err) {}
-                  }
-                
-                } try {
-                	
+                    } catch (NumberFormatException err) {
+                        // Ignorer ugyldige rækker
+                    }
+                }
+            }
+
+            try {
                 productCtrl.confirmDeposit(qtyByProductId);
-                JOptionPane.showMessageDialog(this,
-                    "Lager opdateret med optalte antal for medarbejder " + staffNumber + "!",
-                    "Succes",
-                    JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Lager opdateret med optalte antal for medarbejder " + staffNumber + "!",
+                        "Succes",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this,
-                    "Fejl ved opdatering af lager: " + ex.getMessage(),
-                    "Fejl",
-                    JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Fejl ved opdatering af lager: " + ex.getMessage(),
+                        "Fejl",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         });
+
         return indlagrePanel;
     }
-    																							//IndlagrePanel slut.
+    																								// IndlagrePanel slut
+
     
     
-    
-   
-    
-    
-    																							//LoadInvoice Start.
-    																							//Finder invoice med insertInvoice(invoiceNo), igennem productCtrl.
+    																								// LoadInvoice Start
+    																								// Finder invoice med insertInvoice(invoiceNo), igennem productCtrl.
     private void loadInvoice() {
         String text = txtInvoiceNumber.getText().trim();
         if (text.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(
+                    this,
                     "Indtast et fakturanummer.",
                     "Manglende input",
-                    JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.WARNING_MESSAGE
+            );
             return;
         }
 
@@ -331,113 +324,74 @@ public class MenuScreen extends JFrame {
         try {
             invoiceNo = Integer.parseInt(text);
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(
+                    this,
                     "Fakturanummer skal være et tal.",
                     "Ugyldigt fakturanummer",
-                    JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.ERROR_MESSAGE
+            );
             return;
-            
-        } try {
-        	
+        }
+
+        try {
             Invoice invoice = productCtrl.insertInvoice(invoiceNo);
             if (invoice == null) {
-                JOptionPane.showMessageDialog(this,
+                JOptionPane.showMessageDialog(
+                        this,
                         "Ingen faktura fundet med nummer: " + invoiceNo,
                         "Ikke fundet",
-                        JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.INFORMATION_MESSAGE
+                );
                 return;
             }
 
-            //ryd gamle data
+            // ryd gamle data
             invoiceModel.setRowCount(0);
             countingModel.setRowCount(0);
-            
-            //Udfylder tabeller ud fra fakturalinjerne
+
+            // Udfylder tabeller ud fra fakturalinjerne
             for (InvoiceLine line : invoice.getInvoiceLines()) {
                 var product = line.getProduct();
 
-                //Fakturavarer (venstre tabel)
+                // Fakturavarer (venstre tabel)
                 Object[] leftRow = {
                         product.getProductId(),
                         product.getName(),
-                        line.getQuantity(),
-             
+                        line.getQuantity()
                 };
                 invoiceModel.addRow(leftRow);
 
-                //Optællings tabel til højre.
+                // Optællings tabel til højre.
                 Object[] rightRow = {
                         product.getProductId(),
                         product.getName(),
                         product.getStock().getAmount(),
-                        null    //Optæller, der skrives selv optalt antal, derfor null.
+                        null    // Optæller, der skrives selv optalt antal, derfor null.
                 };
                 countingModel.addRow(rightRow);
             }
 
-            //Catcher til try hele segmentet (DataAccessException)
+            // Catcher til try hele segmentet (DataAccessException)
         } catch (DataAccessException ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(
+                    this,
                     "Fejl ved hentning af faktura: " + ex.getMessage(),
                     "Databasefejl",
-                    JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
-    																							//LoadInvoice slut
+    																								// LoadInvoice Slut.
+
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
- // --AflagerPanel--
+    																								// AflagerPanel Start.
     @SuppressWarnings("serial")
-	private JPanel createAflagrePanel() {
-    	JPanel aflagerPanel = new JPanel(new BorderLayout(10, 10));
-		
-    	// TOP: Titel (du kan senere lave søgefelter, dato osv.)
+    private JPanel createAflagrePanel() {
+        JPanel aflagerPanel = new JPanel(new BorderLayout(10, 10));
+
+        // TOP: Titel (du kan senere lave søgefelter, dato osv.)
         JLabel lblTitle = new JLabel("Aflagre varer", SwingConstants.CENTER);
         lblTitle.setFont(lblTitle.getFont().deriveFont(18f));
         aflagerPanel.add(lblTitle, BorderLayout.NORTH);
@@ -455,7 +409,8 @@ public class MenuScreen extends JFrame {
         DefaultTableModel stockModel = new DefaultTableModel(leftCols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // lagerlisten ændres ikke direkte her
+                // lagerlisten ændres ikke direkte her
+                return false;
             }
         };
         JTable stockTable = new JTable(stockModel);
@@ -498,14 +453,7 @@ public class MenuScreen extends JFrame {
         bottom.add(btnConfirmAflagre);
         aflagerPanel.add(bottom, BorderLayout.SOUTH);
 
-        // TODO: senere koble btnConfirmAflagre til AflagreCtrl / ProductCtrl
-        // btnConfirmAflagre.addActionListener(e -> ...);
-
-    	return aflagerPanel;
+        return aflagerPanel;
     }
-    
-    
-    
-    
-    
+    																								//AflagerPanel Slut.
 }

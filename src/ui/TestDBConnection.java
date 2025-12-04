@@ -1,14 +1,16 @@
 package ui;
 import java.sql.SQLException;
-import java.util.*;
-import modules.*;
-import interfaces.*;
-import dao.*;
+
+import dao.DataAccessException;
+import dao.ProductDB;
+import interfaces.ProductDBIF;
+import modules.Product;
 
 
 public class TestDBConnection {
 	
-    public static void main(String[] args) throws DataAccessException, SQLException {
+    @SuppressWarnings("unused")
+	public static void main(String[] args) throws DataAccessException, SQLException {
     	ProductDBIF productDB = new ProductDB();
         int productId = 1;
     	Product p = productDB.findProductById(1, true);

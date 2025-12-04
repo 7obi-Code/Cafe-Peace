@@ -1,22 +1,22 @@
 package dao;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 import interfaces.ProductDBIF;
 import interfaces.StockDBIF;
-import modules.Product;
-import modules.Produce;
+import interfaces.SupplierDBIF;
 import modules.Beverages;
 import modules.DryFoods;
 import modules.Meat;
+import modules.Produce;
+import modules.Product;
 import modules.Stock;
 import modules.Supplier;
-import interfaces.SupplierDBIF;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.time.LocalDateTime;
 
 public class ProductDB implements ProductDBIF {
     private final StockDBIF stockDB;

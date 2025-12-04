@@ -1,5 +1,4 @@
 package interfaces;
-import java.sql.SQLException;
 import dao.DataAccessException;
 import modules.Supplier;
 

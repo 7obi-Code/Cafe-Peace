@@ -2,8 +2,8 @@ package dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import interfaces.SupplierDBIF;
-import modules.Product;
 import modules.Supplier;
 
 public class SupplierDB implements SupplierDBIF {

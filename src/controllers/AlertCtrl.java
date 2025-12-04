@@ -2,11 +2,15 @@ package controllers;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import dao.AlertDB;
 import dao.DataAccessException;
 import interfaces.AlertDBIF;
 import modules.Alert;
+import modules.Invoice;
+import modules.InvoiceLine;
 import modules.Product;
 
 public class AlertCtrl {
@@ -49,8 +53,31 @@ public class AlertCtrl {
 				}
 			return false;
 		} catch (SQLException e) {
-			e.printStackTrace();
 			throw new DataAccessException("Could not check Max Stock", e);
+		}
+	}
+	
+	public void checkDepositMatchInvoice(Invoice invoice, HashMap<Integer, Integer> countedQtyByProductId) throws DataAccessException	{
+		try	{
+			for (InvoiceLine il : invoice.getInvoiceLines()) {
+					int productId = il.getProduct().getProductId();
+					int invoiceQty = il.getQuantity();
+
+					Integer countedQty = countedQtyByProductId.get(productId);
+					
+					if (invoiceQty != countedQty) {
+		                createAlert(
+		                    Alert.Type.FAKTURA_FAILURE,
+		                    "Optalt antal for " + il.getProduct().getName() + 
+		                    " matcher ikke faktura (" + countedQty + "/" + invoiceQty + ")",
+		                    Alert.Severity.LAV,
+		                    LocalDateTime.now(), 
+		                    il.getProduct()
+		                );
+		            }
+			}
+		} catch (SQLException e) {
+			throw new DataAccessException("Could not check if deposit amount and invoice amount match", e);
 		}
 	}
 }

@@ -8,6 +8,7 @@ import dao.ProductDB;
 import dao.DataAccessException;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -40,18 +41,21 @@ public class ProductCtrl {
 	}
 	
 	//Metoden til at bekræfte indleverings af produkter til lageret udfra currentinvoice //Bruger lambda/streams til at samle mængder pr produkt
-	public void confirmDeposit(Map<Integer, Integer> countedQtyByProductId) throws Exception {
+	public void confirmDeposit(HashMap<Integer, Integer> countedQtyByProductId) throws Exception {
 	    if (currentInvoice == null) {
 	        throw new IllegalStateException("Der er ikke indlæst en faktura endnu.");
 	    }
 
 	    productDB.updateStock(countedQtyByProductId);
+	    
+	    
+	    
 	    for (int productId : countedQtyByProductId.keySet()) {
 	        Product p = productDB.findProductById(productId, true);
 	        alertCtrl.checkMaxStock(p);
+	        alertCtrl.checkDepositMatchInvoice(currentInvoice, countedQtyByProductId);
 	    }
 	}
-
 }
 
 

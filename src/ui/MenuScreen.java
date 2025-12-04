@@ -2,24 +2,24 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.HashMap;
-import java.util.Map;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Dimension;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.UIManager;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 
 import controllers.InvoiceCtrl;
@@ -27,7 +27,6 @@ import controllers.ProductCtrl;
 import dao.DataAccessException;
 import modules.Invoice;
 import modules.InvoiceLine;
-import javax.swing.JOptionPane;
 
 
 public class MenuScreen extends JFrame {
@@ -48,7 +47,8 @@ public class MenuScreen extends JFrame {
     private JTextField txtStaffNumber;
 
     //Kode implementering fields
-    private final InvoiceCtrl invoiceCtrl;
+    @SuppressWarnings("unused")
+	private final InvoiceCtrl invoiceCtrl;
     private final ProductCtrl productCtrl;
 
     
@@ -149,7 +149,8 @@ public class MenuScreen extends JFrame {
     }
 
  // --AflagerPanel--
-    private JPanel createAflagrePanel() {
+    @SuppressWarnings("serial")
+	private JPanel createAflagrePanel() {
     	JPanel aflagerPanel = new JPanel(new BorderLayout(10, 10));
 		
     	// TOP: Titel (du kan senere lave søgefelter, dato osv.)
@@ -222,7 +223,8 @@ public class MenuScreen extends JFrame {
     
     
  // --IndlagerPanel--
-    private JPanel createIndlagrePanel() {
+    @SuppressWarnings("serial")
+	private JPanel createIndlagrePanel() {
         JPanel indlagrePanel = new JPanel(new BorderLayout(10, 10));
 
         // ---------- TOP: Faktura-nummer + knap ----------

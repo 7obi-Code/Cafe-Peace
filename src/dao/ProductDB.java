@@ -1,5 +1,6 @@
 package dao;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,13 +45,18 @@ public class ProductDB implements ProductDBIF {
             throw new DataAccessException("Could not prepare statement for ProductDB", e);
         }
     }
-
+    
+    //updateStock der laver en ny Stock til de produkter der er blevet opdateret ud fra hvad brugeren skrev i UI
+    //Dette er lavet som transaction, da det hele gerne skal ske i et hug så noget ikke bliver opdateret uden andet ikke gør.
     @Override
-    public Map<Product, Integer> updateStock(Map<Integer, Integer> addedQtyToProductId)
-            throws SQLException, DataAccessException {
-
+    public void updateStock(Map<Integer, Integer> addedQtyToProductId) throws DataAccessException {
+    	
         Map<Product, Integer> result = new HashMap<>();
-
+        Connection connection = DBConnection.getInstance().getConnection();
+        
+        try	{
+        connection.setAutoCommit(false);
+        
         for (Map.Entry<Integer, Integer> entry : addedQtyToProductId.entrySet()) {
             int productId     = entry.getKey();
             int depositAmount = entry.getValue();
@@ -60,18 +66,29 @@ public class ProductDB implements ProductDBIF {
             int currentAmount = (currentStock != null) ? currentStock.getAmount() : 0;
             int newAmount     = currentAmount + depositAmount;
 
-            // Create new stock record
+            // Create new stock for a product
             stockDB.createStock(productId, newAmount, LocalDateTime.now());
 
-            // Get strongly typed Product (subclass) — refactored to be abstract
             Product product = findProductById(productId, true);
 
             result.put(product, newAmount);
         }
-
-        return result;
+        
+        connection.commit();
+        connection.setAutoCommit(true);
+        
+        } catch (SQLException e)	{
+        	if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackEx) {
+                    System.err.println("Rollback failed: " + rollbackEx.getMessage());
+                    rollbackEx.printStackTrace();
+                }
+        	}
+        }
     }
-
+    
     @Override
     public Product findProductById(int productId, boolean fullAssociation) throws DataAccessException {
         try {

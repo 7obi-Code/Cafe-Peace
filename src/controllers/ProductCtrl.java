@@ -48,12 +48,11 @@ public class ProductCtrl {
 
 	    productDB.updateStock(countedQtyByProductId);
 	    
-	    
+	    alertCtrl.checkDepositMatchInvoice(currentInvoice, countedQtyByProductId);
 	    
 	    for (int productId : countedQtyByProductId.keySet()) {
 	        Product p = productDB.findProductById(productId, true);
 	        alertCtrl.checkMaxStock(p);
-	        alertCtrl.checkDepositMatchInvoice(currentInvoice, countedQtyByProductId);
 	    }
 	}
 }

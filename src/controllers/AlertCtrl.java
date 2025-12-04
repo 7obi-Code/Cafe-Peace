@@ -53,7 +53,7 @@ public class AlertCtrl {
 				}
 			return false;
 		} catch (SQLException e) {
-			throw new DataAccessException("Could not check Max Stock", e);
+			throw new DataAccessException("Kunne ikke checke MaxStock", e);
 		}
 	}
 	
@@ -68,8 +68,8 @@ public class AlertCtrl {
 					if (invoiceQty != countedQty) {
 		                createAlert(
 		                    Alert.Type.FAKTURA_FAILURE,
-		                    "Optalt antal for " + il.getProduct().getName() + 
-		                    " matcher ikke faktura (" + countedQty + "/" + invoiceQty + ")",
+		                    "Det optalte antal af: " + il.getProduct().getName() + 
+		                    " matcher ikke den forventede mængde: (" + countedQty + "/" + invoiceQty + ")",
 		                    Alert.Severity.LAV,
 		                    LocalDateTime.now(), 
 		                    il.getProduct()
@@ -77,7 +77,7 @@ public class AlertCtrl {
 		            }
 			}
 		} catch (SQLException e) {
-			throw new DataAccessException("Could not check if deposit amount and invoice amount match", e);
+			throw new DataAccessException("Kunne ikke checke at den indtastede mængde matcher den forventede mængde.", e);
 		}
 	}
 }

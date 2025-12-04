@@ -8,10 +8,14 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.HashMap;
+import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -22,9 +26,11 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 
+import controllers.AlertCtrl;
 import controllers.InvoiceCtrl;
 import controllers.ProductCtrl;
 import dao.DataAccessException;
+import modules.Alert;
 import modules.Invoice;
 import modules.InvoiceLine;
 
@@ -44,11 +50,17 @@ public class MenuScreen extends JFrame {
     private DefaultTableModel countingModel;  // Højre
     private JTextField txtInvoiceNumber;      // Invoice Field
     private JTextField txtStaffNumber;        // Medlemsnummer Field
-
+    
+    //Alert infobox fields
+    private DefaultListModel<String> alertListModel;
+    private JList<String> alertList;
+    
     // Kode implementering fields
-    @SuppressWarnings("unused")
-    private final InvoiceCtrl invoiceCtrl;
+    
+    @SuppressWarnings({ "unused" })
+	private final InvoiceCtrl invoiceCtrl;
     private final ProductCtrl productCtrl;
+	private final AlertCtrl alertCtrl;
 
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
@@ -72,7 +84,9 @@ public class MenuScreen extends JFrame {
     public MenuScreen() throws DataAccessException {
         this.invoiceCtrl = new InvoiceCtrl();
         this.productCtrl = new ProductCtrl();
-
+        this.alertCtrl   = new AlertCtrl();
+        
+        
         setTitle("Cafe Peace - Lagersystem");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 500);
@@ -81,6 +95,10 @@ public class MenuScreen extends JFrame {
         contentPane = new JPanel(new BorderLayout());
         setContentPane(contentPane);
 
+        
+        
+        
+        
         // ---------- TOP PANEL (contains toggle + menu bar) ----------
         JPanel topPanel = new JPanel(new BorderLayout());
 
@@ -101,8 +119,13 @@ public class MenuScreen extends JFrame {
         menuPanel.add(btnLager);
         menuPanel.add(btnIndkob);
 
-        topPanel.add(menuPanel, BorderLayout.CENTER);
+        //Centerpanel med alerts til venstre og menuknapper til højre
+        JPanel centerTop = new JPanel(new BorderLayout());
+        centerTop.add(createAlertsPanel(), BorderLayout.WEST);
+        centerTop.add(menuPanel, BorderLayout.CENTER);
 
+        topPanel.add(centerTop, BorderLayout.CENTER);
+        
         // Add the whole topPanel once to the NORTH
         contentPane.add(topPanel, BorderLayout.NORTH);
 
@@ -131,11 +154,53 @@ public class MenuScreen extends JFrame {
             topPanel.repaint();
         });
     }
-    																								// TopMenu Slut
+    																								// TopMenu Slut.
 
     
     
-    																								// IndlagrePanel Start
+    																								//AlertPanel Start.
+    private JPanel createAlertsPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setPreferredSize(new Dimension(250, 60)); // ca. boksen i det røde felt
+        panel.setBorder(BorderFactory.createTitledBorder("Alerts"));
+
+        alertListModel = new DefaultListModel<>();
+        alertList = new JList<>(alertListModel);
+        alertList.setFocusable(false);
+
+        JScrollPane scroll = new JScrollPane(alertList);
+        panel.add(scroll, BorderLayout.CENTER);
+
+        //Henter alerts første gang
+        loadAlertsIntoList();
+
+        return panel;
+    }
+    
+    //Load Alerts
+    private void loadAlertsIntoList() {
+        alertListModel.clear();
+        try {
+            List<Alert> alerts = alertCtrl.getRecentAlerts();
+            for (Alert a : alerts) {
+                
+                String line = "[" + a.getSeverity() + "] " + a.getDescription();
+                alertListModel.addElement(line);
+            }
+            if (alerts.isEmpty()) {
+                alertListModel.addElement("Ingen aktive alerts.");
+            }
+        } catch (DataAccessException ex) {
+            alertListModel.addElement("Fejl ved hentning af alerts.");
+            System.err.println(ex.getMessage());
+        }
+    }
+
+    																								//AlertPanel Slut.
+    
+    
+    
+    																								// IndlagrePanel Start.
     @SuppressWarnings("serial")
     private JPanel createIndlagrePanel() {
         JPanel indlagrePanel = new JPanel(new BorderLayout(10, 10));

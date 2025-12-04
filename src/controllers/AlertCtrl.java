@@ -3,6 +3,7 @@ package controllers;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import dao.AlertDB;
@@ -80,4 +81,14 @@ public class AlertCtrl {
 			throw new DataAccessException("Kunne ikke checke at den indtastede mængde matcher den forventede mængde.", e);
 		}
 	}
+	
+	//Alert list til UI + Exception.
+	public List<Alert> getRecentAlerts() throws DataAccessException {
+	    try {
+	        return alertDB.getRecentAlerts();
+	    } catch (SQLException e) {
+	        throw new DataAccessException("Kunne ikke hente alerts", e);
+	    }
+	}
+
 }

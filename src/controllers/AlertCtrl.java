@@ -11,45 +11,45 @@ import modules.Product;
 
 public class AlertCtrl {
 	private AlertDBIF alertDB;
-	private ProductCtrl productCtrl;
 	
 	
 	public AlertCtrl() throws DataAccessException {
 		alertDB = new AlertDB();
-		productCtrl = new ProductCtrl();
 	}
 	
 	//Opretter en ny alert og gemmer den som aktiv
-	public Alert createAlert(Alert.Type type, String description, Alert.Severity severity, LocalDateTime timestamp) throws SQLException {
+	public Alert createAlert(Alert.Type type, String description, Alert.Severity severity, LocalDateTime timestamp, Product product) throws SQLException {
 	    Alert alert = new Alert(type, description, severity, timestamp);
-	    return alertDB.createAlert(alert); // save to DB
+	    return alertDB.createAlert(alert, product); // save to DB
 	}
 
 	//Checker om produkt er ramt lavt stock, og kaster en advarsel når den er ramt minimum stock
-	public boolean checkMinStock(Product p, int newQty) throws SQLException {
+	
+	/*/public boolean checkMinStock(Product p, int newQty) throws SQLException {
 	    if (newQty <= p.getMinStock()) {
 	        createAlert(Alert.Type.LOW_STOCK, 
 	                    p.getName() + " er nået lavt lager.", 
 	                    Alert.Severity.HØJ,
-	                    LocalDateTime.now());
+	                    LocalDateTime.now(), product);
 	        return true;
 	    }
 	    return false;
-	}
+	} /*/
 
 	//Checker om produkt er ramt maximum stock, og kaster en advarsel hvis den er ramt maximum stock
-	public boolean checkMaxStock(int productId) throws DataAccessException {
+	public boolean checkMaxStock(Product p) throws DataAccessException {
 		try	{
-			Product p = productCtrl.findProductById(productId);
-			if (p.getStock().getAmount() > p.getMaxStock()) {
+			Product product = p;
+			if (product.getStock().getAmount() > product.getMaxStock()) {
 			createAlert(Alert.Type.MAX_STOCK, 
-					p.getName() + " er nået grænsen for lager.",
+					product.getName() + " er nået grænsen for lager.",
 					Alert.Severity.LAV,
-					LocalDateTime.now());
+					LocalDateTime.now(), product);
 				return true;
 				}
 			return false;
 		} catch (SQLException e) {
+			e.printStackTrace();
 			throw new DataAccessException("Could not check Max Stock", e);
 		}
 	}

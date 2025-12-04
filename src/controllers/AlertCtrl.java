@@ -4,16 +4,19 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 import dao.AlertDB;
+import dao.DataAccessException;
 import interfaces.AlertDBIF;
 import modules.Alert;
 import modules.Product;
 
 public class AlertCtrl {
 	private AlertDBIF alertDB;
+	private ProductCtrl productCtrl;
 	
 	
-	public AlertCtrl() {
+	public AlertCtrl() throws DataAccessException {
 		alertDB = new AlertDB();
+		productCtrl = new ProductCtrl();
 	}
 	
 	//Opretter en ny alert og gemmer den som aktiv
@@ -35,14 +38,19 @@ public class AlertCtrl {
 	}
 
 	//Checker om produkt er ramt maximum stock, og kaster en advarsel hvis den er ramt maximum stock
-	public boolean checkMaxStock(Product p, int newQty) throws SQLException {
-		if (newQty > p.getMaxStock()) {
+	public boolean checkMaxStock(int productId) throws DataAccessException {
+		try	{
+			Product p = productCtrl.findProductById(productId);
+			if (p.getStock().getAmount() > p.getMaxStock()) {
 			createAlert(Alert.Type.MAX_STOCK, 
 					p.getName() + " er nået grænsen for lager.",
 					Alert.Severity.LAV,
 					LocalDateTime.now());
-			return true;
+				return true;
+				}
+			return false;
+		} catch (SQLException e) {
+			throw new DataAccessException("Could not check Max Stock", e);
 		}
-		return false;
 	}
 }

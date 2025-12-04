@@ -9,7 +9,7 @@ public class Alert {
 	private LocalDateTime timestamp;
 		
 		public enum Type {
-			LOW_STOCK, MAX_STOCK, INFO
+			LOW_STOCK, MAX_STOCK, FAKTURA_FAILURE
 		}
 		
 		public enum Severity {

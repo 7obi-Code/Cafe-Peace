@@ -6,6 +6,8 @@ import modules.Product;
 import interfaces.ProductDBIF;
 import dao.ProductDB;
 import dao.DataAccessException;
+
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,14 @@ public class ProductCtrl {
 		this.productDB = new ProductDB();
 	}
 	
+	public Product findProductById(int productId) throws DataAccessException	{
+		try	{
+			return productDB.findProductById(productId, true);
+		} catch (SQLException e) {
+    		throw new DataAccessException("Could not find product by Id", e);
+    	}
+	}
+	
 	
 	//Metoden til at hente invoices udfra fakturanummeret, det bliver gemt som nuværende invoice
 	public Invoice insertInvoice(int invoiceNo)	throws DataAccessException {
@@ -34,20 +44,12 @@ public class ProductCtrl {
 	    if (currentInvoice == null) {
 	        throw new IllegalStateException("Der er ikke indlæst en faktura endnu.");
 	    }
-	    
-	    // Use the quantities that the user entered
-	    // countedQtyByProductId: Map<ProductId, OptaltAntal>
-	    
-	    Map<Product, Integer> newStockByProduct = productDB.updateStock(countedQtyByProductId);
 
-	    // Check alerts for each product
-	    newStockByProduct.forEach((product, newQty) -> {
-	        try {
-	            alertCtrl.checkMaxStock(product, newQty);
-	        } catch (Exception e) {
-	            throw new RuntimeException(e);
-	        }
-	    });
+	    productDB.updateStock(countedQtyByProductId);
+	    for (int productId : countedQtyByProductId.keySet()) {
+	        Product p = productDB.findProductById(productId, true);
+	        alertCtrl.checkMaxStock(p);
+	    }
 	}
 
 }

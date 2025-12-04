@@ -2,7 +2,6 @@ package dao;
 
 import interfaces.ProductDBIF;
 import interfaces.StockDBIF;
-import modules.Invoice;
 import modules.Product;
 import modules.Produce;
 import modules.Beverages;
@@ -13,6 +12,7 @@ import modules.Supplier;
 import interfaces.SupplierDBIF;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,42 +21,28 @@ import java.time.LocalDateTime;
 public class ProductDB implements ProductDBIF {
     private final StockDBIF stockDB;
     private final SupplierDBIF supplierDB;
-    
-    private static final String SELECT_ALL_PRODUCTS =
-    		"SELECT productId, name, minStock, maxStock, expiryDate, unit, prodType, supPhone_FK FROM Product";
 
-    	private static final String SELECT_BY_ID = SELECT_ALL_PRODUCTS + " WHERE productId = ?";
+    // SELECT * with table aliases
+    private static final String SELECT_ALL_PRODUCTS_WITH_TYPE_INFO =
+        "SELECT * FROM Product p " +
+        "LEFT JOIN Produce pr ON p.productId = pr.productId_FK " +
+        "LEFT JOIN DryFoods df ON p.productId = df.productId_FK " +
+        "LEFT JOIN Beverage b ON p.productId = b.productId_FK " +
+        "LEFT JOIN Meat m ON p.productId = m.productId_FK ";
 
-    	private static final String SELECT_PRODUCE = 
-    		"SELECT packageSize, produceType FROM Produce WHERE productId_FK = ?";
+    private static final String SELECT_BY_ID =
+        SELECT_ALL_PRODUCTS_WITH_TYPE_INFO + " WHERE p.productId = ?";
 
-    	private static final String SELECT_DRYFOODS =
-    		"SELECT productId_FK, packageSize, dryFoodsType FROM DryFoods WHERE productId_FK = ?";
-
-    	private static final String SELECT_BEVERAGE =
-    		"SELECT productId_FK, hasSugar, size FROM Beverage WHERE productId_FK = ?";
-
-    	private static final String SELECT_MEAT =
-    		"SELECT productId_FK, animal, weight FROM Meat WHERE productId_FK = ?";
-	
-	private PreparedStatement selectById;
-	private PreparedStatement selectProduce;
-	private PreparedStatement selectDryFoods;
-	private PreparedStatement selectBeverage;
-	private PreparedStatement selectMeat;
+    private PreparedStatement selectById;
 
     public ProductDB() throws DataAccessException {
         this.stockDB = new StockDB();
         this.supplierDB = new SupplierDB();
         try {
-        	selectById = DBConnection.getInstance().getConnection().prepareStatement(SELECT_BY_ID);
-        	selectProduce = DBConnection.getInstance().getConnection().prepareStatement(SELECT_PRODUCE);
-			selectDryFoods = DBConnection.getInstance().getConnection().prepareStatement(SELECT_DRYFOODS);
-			selectBeverage = DBConnection.getInstance().getConnection().prepareStatement(SELECT_BEVERAGE);
-			selectMeat = DBConnection.getInstance().getConnection().prepareStatement(SELECT_MEAT);
-		} catch (SQLException e) {
-			throw new DataAccessException("Could not prepare statements for ProductDB", e);
-		}
+            selectById = DBConnection.getInstance().getConnection().prepareStatement(SELECT_BY_ID);
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not prepare statement for ProductDB", e);
+        }
     }
 
     @Override
@@ -74,10 +60,10 @@ public class ProductDB implements ProductDBIF {
             int currentAmount = (currentStock != null) ? currentStock.getAmount() : 0;
             int newAmount     = currentAmount + depositAmount;
 
-            // Ny stock-record oprettes
+            // Create new stock record
             stockDB.createStock(productId, newAmount, LocalDateTime.now());
 
-            // Hent produktet gennem Product
+            // Get strongly typed Product (subclass) — refactored to be abstract
             Product product = findProductById(productId, true);
 
             result.put(product, newAmount);
@@ -85,163 +71,123 @@ public class ProductDB implements ProductDBIF {
 
         return result;
     }
-    
+
+    @Override
     public Product findProductById(int productId, boolean fullAssociation) throws DataAccessException {
-		try {
-			selectById.setInt(1, productId);
-			ResultSet rs = selectById.executeQuery();
-			return buildObject(rs, fullAssociation);
-		} catch (SQLException e) {
-			throw new DataAccessException("Could not find param or select invoice by No", e);
-		}
+        try {
+            selectById.setInt(1, productId);
+            ResultSet rs = selectById.executeQuery();
+            return buildObject(rs, fullAssociation);
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not find parameter or select product by ID", e);
+        }
     }
 
-	private Product buildObject(ResultSet rs, boolean fullAssociation) throws DataAccessException {
-		Product p = null;
-		try	{
-			if (rs.next())	{
-				p = new Product(
-						rs.getInt("productId"),
-						rs.getString("name"),
-						rs.getInt("minStock"),
-						rs.getInt("maxStock"),
-						rs.getString("expiryDate"),
-						rs.getString("unit"),
-						rs.getString("prodType")
-				);
-				
-				if (fullAssociation)	{
-					p = buildType(p);
-					Supplier supplier = supplierDB.findSupplierByPhone(rs.getString("supPhone_FK"), false);
-					p.setSupplier(supplier);
-					Stock stock = stockDB.findStockByProductId(rs.getInt("productId"));
-					p.setStock(stock);
-				}
-			}
-		} catch (SQLException e)	{
-			throw new DataAccessException("Could not read result set for Product", e);
-		}
-		return p;
-	}
-
-	private Product buildType(Product base) throws DataAccessException {
-		String type = base.getProdType();
-
-		try {
-			switch (type) {
-				case "Produce":
-					selectProduce.setInt(1, base.getProductId());
-	                try (ResultSet rs = selectProduce.executeQuery()) {
-	                    return loadProduce(rs, base);
-	                }
-				case "DryFoods":
-					selectDryFoods.setInt(1, base.getProductId());
-	                try (ResultSet rs = selectDryFoods.executeQuery()) {
-	                    return loadDryFoods(rs, base);
-	                }
-				case "Beverage":
-					selectBeverage.setInt(1, base.getProductId());
-	                try (ResultSet rs = selectBeverage.executeQuery()) {
-	                    return loadBeverage(rs, base);
-	                }
-				case "Meat":
-					selectMeat.setInt(1, base.getProductId());
-	                try (ResultSet rs = selectMeat.executeQuery()) {
-	                    return loadMeat(rs, base);
-	                }
-				default:
-					return base;
-			}
-		} catch (SQLException e) {
-			throw new DataAccessException("Could not load type for products", e);
-		}
-	}
-	
-    private Produce loadProduce(ResultSet rs, Product base) throws DataAccessException {
-        Produce produce = null;
-    	try {
+    private Product buildObject(ResultSet rs, boolean fullAssociation) throws DataAccessException {
+        try {
             if (rs.next()) {
-            	produce = new Produce(
-                    base.getProductId(),
-                    base.getName(),
-                    base.getMinStock(),
-                    base.getMaxStock(),
-                    base.getExpiryDate(),
-                    base.getUnit(),
-                    base.getProdType(),
-                    rs.getString("packageSize"),
-                    rs.getString("produceType")
-                );
+                String prodType = rs.getString("prodType");
+                Product product = null;
+                switch (prodType) {
+                    case "Produce":
+                        product = buildProduce(rs);
+                        break;
+                    case "DryFoods":
+                        product = buildDryFoods(rs);
+                        break;
+                    case "Beverage":
+                        product = buildBeverage(rs);
+                        break;
+                    case "Meat":
+                        product = buildMeat(rs);
+                        break;
+                }
+
+                if (fullAssociation && product != null) {
+                    int productId = rs.getInt("productId");
+                    Supplier supplier = supplierDB.findSupplierByPhone(rs.getString("supPhone_FK"), false);
+                    product.setSupplier(supplier);
+                    Stock stock = stockDB.findStockByProductId(productId);
+                    product.setStock(stock);
+                }
+
+                return product;
             }
         } catch (SQLException e) {
-			throw new DataAccessException("Could not load type for produce", e);
-		}
-        return produce;
+            throw new DataAccessException("Could not read result set for Product", e);
+        }
+        return null;
+    }
+
+    private Produce buildProduce(ResultSet rs) throws DataAccessException {
+    	try {
+    		return new Produce(
+    				rs.getInt("productId"),
+    				rs.getString("name"),
+    				rs.getInt("minStock"),
+    				rs.getInt("maxStock"),
+    				rs.getString("expiryDate"),
+    				rs.getString("unit"),
+    				rs.getString("prodType"),
+    				rs.getString("packageSize"),
+    				rs.getString("produceType")
+    				);
+    	} catch (SQLException e) {
+    		throw new DataAccessException("Could not read result set for Beverage", e);
+    	}
     }
     
-    private DryFoods loadDryFoods(ResultSet rs, Product base) throws DataAccessException {
-        DryFoods dryFoods = null;
-        try {
-            if (rs.next()) {
-                dryFoods = new DryFoods(
-                    base.getProductId(),
-                    base.getName(),
-                    base.getMinStock(),
-                    base.getMaxStock(),
-                    base.getExpiryDate(),
-                    base.getUnit(),
-                    base.getProdType(),
-                    rs.getString("packageSize"),
-                    rs.getString("dryFoodsType")
-                );
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Could not load type for product dryfoods", e);
-        }
-        return dryFoods;
+    private DryFoods buildDryFoods(ResultSet rs) throws DataAccessException {
+    	try {
+    		return new DryFoods(
+    				rs.getInt("productId"),
+    				rs.getString("name"),
+    				rs.getInt("minStock"),
+    				rs.getInt("maxStock"),
+    				rs.getString("expiryDate"),
+    				rs.getString("unit"),
+    				rs.getString("prodType"),
+    				rs.getString("packageSize"),
+    				rs.getString("dryFoodsType")
+    				);
+    	} catch (SQLException e) {
+    		throw new DataAccessException("Could not read result set for Beverage", e);
+    	}
     }
-
-    private Beverages loadBeverage(ResultSet rs, Product base) throws DataAccessException {
-        Beverages beverage = null;
-        try {
-            if (rs.next()) {
-                beverage = new Beverages(
-                    base.getProductId(),
-                    base.getName(),
-                    base.getMinStock(),
-                    base.getMaxStock(),
-                    base.getExpiryDate(),
-                    base.getUnit(),
-                    base.getProdType(),
-                    rs.getBoolean("hasSugar"),
-                    rs.getString("size")
-                );
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Could not load type for product beverage", e);
-        }
-        return beverage;
+    
+    private Beverages buildBeverage(ResultSet rs) throws DataAccessException {
+    	try {
+    		return new Beverages(
+    				rs.getInt("productId"),
+    				rs.getString("name"),
+    				rs.getInt("minStock"),
+    				rs.getInt("maxStock"),
+    				rs.getString("expiryDate"),
+    				rs.getString("unit"),
+    				rs.getString("prodType"),
+    				rs.getBoolean("hasSugar"),
+    				rs.getString("size")
+    				);
+    	} catch (SQLException e) {
+    		throw new DataAccessException("Could not read result set for Beverage", e);
+    	}
     }
-
-    private Meat loadMeat(ResultSet rs, Product base) throws DataAccessException {
-        Meat meat = null;
-        try {
-            if (rs.next()) {
-                meat = new Meat(
-                    base.getProductId(),
-                    base.getName(),
-                    base.getMinStock(),
-                    base.getMaxStock(),
-                    base.getExpiryDate(),
-                    base.getUnit(),
-                    base.getProdType(),
-                    rs.getDouble("weight"),
-                    rs.getString("animal")
-                );
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Could not load type for product meat", e);
-        }
-        return meat;
+    
+    private Meat buildMeat(ResultSet rs) throws DataAccessException {
+    	try {
+    		return new Meat(
+    				rs.getInt("productId"),
+    				rs.getString("name"),
+    				rs.getInt("minStock"),
+    				rs.getInt("maxStock"),
+    				rs.getString("expiryDate"),
+    				rs.getString("unit"),
+    				rs.getString("prodType"),
+    				rs.getDouble("weight"),
+    				rs.getString("animal")
+    				);
+    	} catch (SQLException e) {
+    		throw new DataAccessException("Could not read result set for Product", e);
+    	}
     }
 }

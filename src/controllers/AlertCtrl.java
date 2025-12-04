@@ -66,6 +66,11 @@ public class AlertCtrl {
 					Integer countedQty = countedQtyByProductId.get(productId);
 					
 					if (invoiceQty != countedQty) {
+						System.out.println(
+								  "Loop: productId=" + productId
+								  + ", productName=" + il.getProduct().getName()
+								  + ", invoiceQty=" + invoiceQty
+								  + ", countedQty=" + countedQty);
 		                createAlert(
 		                    Alert.Type.FAKTURA_FAILURE,
 		                    "Optalt antal for " + il.getProduct().getName() + 

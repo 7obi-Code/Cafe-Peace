@@ -161,7 +161,8 @@ public class MenuScreen extends JFrame {
     																								//AlertPanel Start.
     private JPanel createAlertsPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(new Dimension(250, 60)); // ca. boksen i det røde felt
+        panel.setPreferredSize(new Dimension(320, 60)); //Infobox størrelse
+        panel.setMinimumSize(new Dimension(320, 60)); //Infobox størrelse
         panel.setBorder(BorderFactory.createTitledBorder("Alerts"));
 
         alertListModel = new DefaultListModel<>();

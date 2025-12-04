@@ -71,6 +71,7 @@ public class MenuScreen extends JFrame {
         });
     }
 
+    																										//TopMenu Start.
     public MenuScreen() throws DataAccessException{
     	
         this.invoiceCtrl = new InvoiceCtrl();
@@ -135,11 +136,10 @@ public class MenuScreen extends JFrame {
             topPanel.revalidate();
             topPanel.repaint();
         });
-
-        // Default screen
-        cardLayout.show(cardPanel, "AFLAGRE");
     }
-
+    																									//TopMenu Slut.
+    
+    //Ikke helt sikker på hvad dette gør????
     private JPanel createLabelPanel(String text) {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel(text, SwingConstants.CENTER);
@@ -147,7 +147,291 @@ public class MenuScreen extends JFrame {
         panel.add(label, BorderLayout.CENTER);
         return panel;
     }
+    
+    
+    
+    
+    
+    
+    																							//IndlagrePanel Start.
+    @SuppressWarnings("serial")
+	private JPanel createIndlagrePanel() {
+        JPanel indlagrePanel = new JPanel(new BorderLayout(10, 10));
 
+        // ---------- TOP: Faktura-nummer + knap ----------
+        JPanel top = new JPanel();
+        JLabel lblInvoice = new JLabel("Fakturanr:");
+        txtInvoiceNumber = new JTextField(10);
+        JButton btnLoadInvoice = new JButton("Hent faktura");
+
+        top.add(lblInvoice);
+        top.add(txtInvoiceNumber);
+        top.add(btnLoadInvoice);
+
+        indlagrePanel.add(top, BorderLayout.NORTH);
+
+        // ---------- CENTER: To tabeller side om side ----------
+        JPanel center = new JPanel(new GridLayout(1, 2, 10, 0)); // 1 række, 2 kolonner
+
+        // ========== VENSTRE: FAKTURAVARER ==========
+        JPanel invoicePanel = new JPanel(new BorderLayout());
+
+        JPanel leftHeader = new JPanel(new BorderLayout());
+        JLabel lblLeftTitle = new JLabel("Fakturavarer", SwingConstants.CENTER);
+        lblLeftTitle.setFont(lblLeftTitle.getFont().deriveFont(16f));
+        leftHeader.add(lblLeftTitle, BorderLayout.CENTER);
+        // fast højde så venstre og højre header matcher
+        leftHeader.setPreferredSize(new Dimension(1, 40));
+        invoicePanel.add(leftHeader, BorderLayout.NORTH);
+
+        String[] invoiceColumns = { "Varenr", "Navn", "Faktura-antal"};
+        invoiceModel = new DefaultTableModel(invoiceColumns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        invoiceTable = new JTable(invoiceModel);
+        invoicePanel.add(new JScrollPane(invoiceTable), BorderLayout.CENTER);
+
+        // ========== HØJRE: OPTÆLLING ==========
+        JPanel countingPanel = new JPanel(new BorderLayout());
+
+     // Header: titel + medarbejdernr-felt + grøn "Bekræft"-knap
+        JPanel rightHeader = new JPanel(new BorderLayout());
+        JLabel lblRightTitle = new JLabel("Optælling", SwingConstants.CENTER);
+        lblRightTitle.setFont(lblRightTitle.getFont().deriveFont(16f));
+        rightHeader.add(lblRightTitle, BorderLayout.CENTER);
+
+        JButton btnConfirm = new JButton("Bekræft");
+        btnConfirm.setBackground(new Color(0, 180, 0));
+        btnConfirm.setForeground(Color.WHITE);
+        btnConfirm.setFocusPainted(false);
+
+        // Panel til medarbejdernr + knap (samme højde, ingen ændring)
+        JPanel btnWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 7));
+        btnWrapper.setOpaque(false);
+
+        JLabel lblStaff = new JLabel("Medarbejdernr:");
+        txtStaffNumber = new JTextField(8);   //Medarbejdernummer field.
+
+        btnWrapper.add(lblStaff);
+        btnWrapper.add(txtStaffNumber);
+        btnWrapper.add(btnConfirm);
+
+        rightHeader.add(btnWrapper, BorderLayout.EAST);
+
+        // samme faste højde som venstre header
+        rightHeader.setPreferredSize(new Dimension(1, 40));
+
+        countingPanel.add(rightHeader, BorderLayout.NORTH);
+
+        String[] countingColumns = { "Varenr", "Navn", "System-antal", "Optalt antal" };
+        countingModel = new DefaultTableModel(countingColumns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Kun "Optalt antal" (kolonne 3) må ændres
+                return column == 3;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 2 || columnIndex == 3) {
+                    return Integer.class;
+                }
+                return String.class;
+            }
+        };
+        countingTable = new JTable(countingModel);
+        countingPanel.add(new JScrollPane(countingTable), BorderLayout.CENTER);
+
+        // Tilføj begge paneler til center
+        center.add(invoicePanel);
+        center.add(countingPanel);
+
+        indlagrePanel.add(center, BorderLayout.CENTER);
+
+        // ---------- Knap-action: Hent faktura ----------
+        btnLoadInvoice.addActionListener(e -> loadInvoice());
+
+        
+        btnConfirm.addActionListener(e -> {
+            // --- Tjek medarbejdernr først ---
+            String staffText = txtStaffNumber.getText().trim();
+            if (staffText.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Indtast et medarbejdernr.",
+                    "Manglende input",
+                    JOptionPane.WARNING_MESSAGE);
+                return;
+                
+            } int staffNumber; try {
+            	
+                staffNumber = Integer.parseInt(staffText); //Checker om staffnummeret er ugyldigt.
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this,
+                    "Medarbejdernr skal være et tal.",
+                    "Ugyldigt medarbejdernr",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            HashMap<Integer, Integer> qtyByProductId = new HashMap<>();
+
+            //Loop through table rows
+            for (int i = 0; i < countingModel.getRowCount(); i++) {
+                Object prodIdObj = countingModel.getValueAt(i, 0); // Varenr
+                Object countedObj = countingModel.getValueAt(i, 3); // Optalt antal
+
+                if (prodIdObj != null && countedObj != null) {
+                    try {
+                        int prodId = (Integer) prodIdObj;
+                        int countedQty = Integer.parseInt(countedObj.toString());
+                        qtyByProductId.put(prodId, countedQty);
+                    } catch (NumberFormatException err) {}
+                  }
+                
+                } try {
+                	
+                productCtrl.confirmDeposit(qtyByProductId);
+                JOptionPane.showMessageDialog(this,
+                    "Lager opdateret med optalte antal for medarbejder " + staffNumber + "!",
+                    "Succes",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this,
+                    "Fejl ved opdatering af lager: " + ex.getMessage(),
+                    "Fejl",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        return indlagrePanel;
+    }
+    																							//IndlagrePanel slut.
+    
+    
+    
+   
+    
+    
+    																							//LoadInvoice Start.
+    																							//Finder invoice med insertInvoice(invoiceNo), igennem productCtrl.
+    private void loadInvoice() {
+        String text = txtInvoiceNumber.getText().trim();
+        if (text.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Indtast et fakturanummer.",
+                    "Manglende input",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int invoiceNo;
+        try {
+            invoiceNo = Integer.parseInt(text);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Fakturanummer skal være et tal.",
+                    "Ugyldigt fakturanummer",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+            
+        } try {
+        	
+            Invoice invoice = productCtrl.insertInvoice(invoiceNo);
+            if (invoice == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Ingen faktura fundet med nummer: " + invoiceNo,
+                        "Ikke fundet",
+                        JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            //ryd gamle data
+            invoiceModel.setRowCount(0);
+            countingModel.setRowCount(0);
+            
+            //Udfylder tabeller ud fra fakturalinjerne
+            for (InvoiceLine line : invoice.getInvoiceLines()) {
+                var product = line.getProduct();
+
+                //Fakturavarer (venstre tabel)
+                Object[] leftRow = {
+                        product.getProductId(),
+                        product.getName(),
+                        line.getQuantity(),
+             
+                };
+                invoiceModel.addRow(leftRow);
+
+                //Optællings tabel til højre.
+                Object[] rightRow = {
+                        product.getProductId(),
+                        product.getName(),
+                        product.getStock().getAmount(),
+                        null    //Optæller, der skrives selv optalt antal, derfor null.
+                };
+                countingModel.addRow(rightRow);
+            }
+
+            //Catcher til try hele segmentet (DataAccessException)
+        } catch (DataAccessException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Fejl ved hentning af faktura: " + ex.getMessage(),
+                    "Databasefejl",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    																							//LoadInvoice slut
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
  // --AflagerPanel--
     @SuppressWarnings("serial")
 	private JPanel createAflagrePanel() {
@@ -222,234 +506,6 @@ public class MenuScreen extends JFrame {
     
     
     
- // --IndlagerPanel--
-    @SuppressWarnings("serial")
-	private JPanel createIndlagrePanel() {
-        JPanel indlagrePanel = new JPanel(new BorderLayout(10, 10));
-
-        // ---------- TOP: Faktura-nummer + knap ----------
-        JPanel top = new JPanel();
-        JLabel lblInvoice = new JLabel("Fakturanr:");
-        txtInvoiceNumber = new JTextField(10);
-        JButton btnLoadInvoice = new JButton("Hent faktura");
-
-        top.add(lblInvoice);
-        top.add(txtInvoiceNumber);
-        top.add(btnLoadInvoice);
-
-        indlagrePanel.add(top, BorderLayout.NORTH);
-
-        // ---------- CENTER: To tabeller side om side ----------
-        JPanel center = new JPanel(new GridLayout(1, 2, 10, 0)); // 1 række, 2 kolonner
-
-        // ========== VENSTRE: FAKTURAVARER ==========
-        JPanel invoicePanel = new JPanel(new BorderLayout());
-
-        JPanel leftHeader = new JPanel(new BorderLayout());
-        JLabel lblLeftTitle = new JLabel("Fakturavarer", SwingConstants.CENTER);
-        lblLeftTitle.setFont(lblLeftTitle.getFont().deriveFont(16f));
-        leftHeader.add(lblLeftTitle, BorderLayout.CENTER);
-        // fast højde så venstre og højre header matcher
-        leftHeader.setPreferredSize(new Dimension(1, 40));
-        invoicePanel.add(leftHeader, BorderLayout.NORTH);
-
-        String[] invoiceColumns = { "Varenr", "Navn", "Faktura-antal"};
-        invoiceModel = new DefaultTableModel(invoiceColumns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        invoiceTable = new JTable(invoiceModel);
-        invoicePanel.add(new JScrollPane(invoiceTable), BorderLayout.CENTER);
-
-        // ========== HØJRE: OPTÆLLING ==========
-        JPanel countingPanel = new JPanel(new BorderLayout());
-
-     // Header: titel + medarbejdernr-felt + grøn "Bekræft"-knap
-        JPanel rightHeader = new JPanel(new BorderLayout());
-        JLabel lblRightTitle = new JLabel("Optælling", SwingConstants.CENTER);
-        lblRightTitle.setFont(lblRightTitle.getFont().deriveFont(16f));
-        rightHeader.add(lblRightTitle, BorderLayout.CENTER);
-
-        JButton btnConfirm = new JButton("Bekræft");
-        btnConfirm.setBackground(new Color(0, 180, 0));
-        btnConfirm.setForeground(Color.WHITE);
-        btnConfirm.setFocusPainted(false);
-
-        // Panel til medarbejdernr + knap (samme højde, ingen ændring)
-        JPanel btnWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 7));
-        btnWrapper.setOpaque(false);
-
-        JLabel lblStaff = new JLabel("Medarbejdernr:");
-        txtStaffNumber = new JTextField(8);   // samme stil som fakturanr, bare kortere
-
-        btnWrapper.add(lblStaff);
-        btnWrapper.add(txtStaffNumber);
-        btnWrapper.add(btnConfirm);
-
-        rightHeader.add(btnWrapper, BorderLayout.EAST);
-
-        // samme faste højde som venstre header
-        rightHeader.setPreferredSize(new Dimension(1, 40));
-
-        countingPanel.add(rightHeader, BorderLayout.NORTH);
-
-        String[] countingColumns = { "Varenr", "Navn", "System-antal", "Optalt antal" };
-        countingModel = new DefaultTableModel(countingColumns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                // Kun "Optalt antal" (kolonne 3) må ændres
-                return column == 3;
-            }
-
-            @Override
-            public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == 2 || columnIndex == 3) {
-                    return Integer.class;
-                }
-                return String.class;
-            }
-        };
-        countingTable = new JTable(countingModel);
-        countingPanel.add(new JScrollPane(countingTable), BorderLayout.CENTER);
-
-        // Tilføj begge paneler til center
-        center.add(invoicePanel);
-        center.add(countingPanel);
-
-        indlagrePanel.add(center, BorderLayout.CENTER);
-
-        // ---------- Knap-action: Hent faktura ----------
-        btnLoadInvoice.addActionListener(e -> loadInvoice());
-
-        // senere kan du koble btnConfirm til ProductCtrl.confirmDeposit()
-        btnConfirm.addActionListener(e -> {
-            // --- Tjek medarbejdernr først ---
-            String staffText = txtStaffNumber.getText().trim();
-            if (staffText.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                    "Indtast et medarbejdernr.",
-                    "Manglende input",
-                    JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            int staffNumber;
-            try {
-                staffNumber = Integer.parseInt(staffText);
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this,
-                    "Medarbejdernr skal være et tal.",
-                    "Ugyldigt medarbejdernr",
-                    JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            HashMap<Integer, Integer> qtyByProductId = new HashMap<>();
-
-            // Loop through table rows
-            for (int i = 0; i < countingModel.getRowCount(); i++) {
-                Object prodIdObj = countingModel.getValueAt(i, 0); // Varenr
-                Object countedObj = countingModel.getValueAt(i, 3); // Optalt antal
-
-                if (prodIdObj != null && countedObj != null) {
-                    try {
-                        int prodId = (Integer) prodIdObj;
-                        int countedQty = Integer.parseInt(countedObj.toString());
-                        qtyByProductId.put(prodId, countedQty);
-                    } catch (NumberFormatException err) {
-                        // evt. besked til brugeren
-                    }
-                }
-            }
-
-            // TODO: brug staffNumber i ProductCtrl, når I er klar til det
-            // f.eks. productCtrl.confirmDeposit(qtyByProductId, staffNumber);
-
-            try {
-                productCtrl.confirmDeposit(qtyByProductId);
-                JOptionPane.showMessageDialog(this,
-                    "Lager opdateret med optalte antal for medarbejder " + staffNumber + "!",
-                    "Succes",
-                    JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this,
-                    "Fejl ved opdatering af lager: " + ex.getMessage(),
-                    "Fejl",
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        });
-        return indlagrePanel;
-    }
-
- // Loader faktura via controller og putter linjer i tabellerne
-    private void loadInvoice() {
-        String text = txtInvoiceNumber.getText().trim();
-        if (text.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Indtast et fakturanummer.",
-                    "Manglende input",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int invoiceNo;
-        try {
-            invoiceNo = Integer.parseInt(text);
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Fakturanummer skal være et tal.",
-                    "Ugyldigt fakturanummer",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        try {
-            Invoice invoice = productCtrl.insertInvoice(invoiceNo);
-            if (invoice == null) {
-                JOptionPane.showMessageDialog(this,
-                        "Ingen faktura fundet med nummer: " + invoiceNo,
-                        "Ikke fundet",
-                        JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-
-            // ryd gamle data
-            invoiceModel.setRowCount(0);
-            countingModel.setRowCount(0);
-
-            // udfyld tabeller ud fra fakturalinjerne
-            for (InvoiceLine line : invoice.getInvoiceLines()) {
-                var product = line.getProduct();
-
-                // fakturavarer (venstre tabel)
-                Object[] leftRow = {
-                        product.getProductId(),
-                        product.getName(),
-                        line.getQuantity(),
-             
-                };
-                invoiceModel.addRow(leftRow);
-
-                // optælling (højre tabel) – system-antal er ukendt her,
-                // I kan evt. hente det senere fra lageret.
-                Object[] rightRow = {
-                        product.getProductId(),
-                        product.getName(),
-                        product.getStock().getAmount(),
-                        null    // Optalt antal (brugeren skriver selv)
-                };
-                countingModel.addRow(rightRow);
-            }
-
-        } catch (DataAccessException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                    "Fejl ved hentning af faktura: " + ex.getMessage(),
-                    "Databasefejl",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
+    
+    
 }

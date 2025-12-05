@@ -297,72 +297,13 @@ public class MenuScreen extends JFrame {
         // ---------- Knap-action: Hent faktura ----------
         btnLoadInvoice.addActionListener(e -> loadInvoice());
 
-<<<<<<< Updated upstream
-        // ---------- Bekræft-logik ----------
-        btnConfirm.addActionListener(e -> {
-            // --- Tjek medarbejdernr først ---
-            String staffText = txtStaffNumber.getText().trim();
-            if (staffText.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                    "Indtast et medarbejdernr.",
-                    "Manglende input",
-                    JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            int staffNumber;
-            try {
-                staffNumber = Integer.parseInt(staffText); // Checker om staffnummeret er ugyldigt.
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this,
-                    "Medarbejdernr skal være et tal.",
-                    "Ugyldigt medarbejdernr",
-                    JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            HashMap<Integer, Integer> qtyByProductId = new HashMap<>();
-
-            // Loop through table rows
-            for (int i = 0; i < countingModel.getRowCount(); i++) {
-                Object prodIdObj = countingModel.getValueAt(i, 0); // Varenr
-                Object countedObj = countingModel.getValueAt(i, 3); // Optalt antal
-
-                if (prodIdObj != null && countedObj != null) {
-                    try {
-                        int prodId = (Integer) prodIdObj;
-                        int countedQty = Integer.parseInt(countedObj.toString());
-                        qtyByProductId.put(prodId, countedQty);
-                    } catch (NumberFormatException err) {
-                        // ignorér ugyldige rækker
-                    }
-                }
-            }
-
-            try {
-                productCtrl.confirmDeposit(qtyByProductId);
-                JOptionPane.showMessageDialog(this,
-                    "Lager opdateret med optalte antal for medarbejder " + staffNumber + "!",
-                    "Succes",
-                    JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this,
-                    "Fejl ved opdatering af lager: " + ex.getMessage(),
-                    "Fejl",
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        });
-=======
         btnConfirm.addActionListener(e -> confirmDeposit());
->>>>>>> Stashed changes
+
 
         return indlagrePanel;
     }
     																								// IndlagrePanel slut
 
-    
-    
     																								// LoadInvoice Start
     																								// Finder invoice med insertInvoice(invoiceNo), igennem productCtrl.
     private void confirmDeposit()	{
@@ -486,7 +427,16 @@ public class MenuScreen extends JFrame {
                 );
                 return;
             }
-
+            
+            if (invoice.getStatus() == Invoice.Status.COMPLETED) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Denne faktura er allerede færdigbehandlet og kan ikke indlæses.",
+                        "Faktura færdig",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
             // ryd gamle data
             invoiceModel.setRowCount(0);
             countingModel.setRowCount(0);

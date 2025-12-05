@@ -297,6 +297,7 @@ public class MenuScreen extends JFrame {
         // ---------- Knap-action: Hent faktura ----------
         btnLoadInvoice.addActionListener(e -> loadInvoice());
 
+<<<<<<< Updated upstream
         // ---------- Bekræft-logik ----------
         btnConfirm.addActionListener(e -> {
             // --- Tjek medarbejdernr først ---
@@ -352,6 +353,9 @@ public class MenuScreen extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
             }
         });
+=======
+        btnConfirm.addActionListener(e -> confirmDeposit());
+>>>>>>> Stashed changes
 
         return indlagrePanel;
     }
@@ -361,6 +365,91 @@ public class MenuScreen extends JFrame {
     
     																								// LoadInvoice Start
     																								// Finder invoice med insertInvoice(invoiceNo), igennem productCtrl.
+    private void confirmDeposit()	{
+        // --- Tjek medarbejdernr først ---
+        String staffText = txtStaffNumber.getText().trim();
+        if (staffText.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Indtast et medarbejdernr.",
+                    "Manglende input",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        int staffNumber;
+        try {
+            // Checker om staffnummeret er ugyldigt.
+            staffNumber = Integer.parseInt(staffText);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Medarbejdernr skal være et tal.",
+                    "Ugyldigt medarbejdernr",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        HashMap<Integer, Integer> qtyByProductId = new HashMap<>();
+
+        // Loop through table rows
+        for (int i = 0; i < countingModel.getRowCount(); i++) {
+            Object prodIdObj = countingModel.getValueAt(i, 0); // Varenr
+            Object countedObj = countingModel.getValueAt(i, 3); // Optalt antal
+
+            if (prodIdObj != null && countedObj != null) {
+                try {
+                    int prodId = (Integer) prodIdObj;
+                    int countedQty = Integer.parseInt(countedObj.toString());
+                    qtyByProductId.put(prodId, countedQty);
+                } catch (NumberFormatException err) {
+                    // Ignorer ugyldige rækker
+                }
+            }
+        }
+
+        try {
+            // --- 1. Update the inventory quantities ---
+            productCtrl.confirmDeposit(qtyByProductId);
+
+            // --- 2. Mark invoice as COMPLETED ---
+            int invoiceNoConfirmed = Integer.parseInt(txtInvoiceNumber.getText().trim());
+            invoiceCtrl.updateInvoiceStatus(invoiceNoConfirmed, Invoice.Status.COMPLETED);
+
+            // --- 3. Clear UI ---
+            txtInvoiceNumber.setText("");
+            invoiceModel.setRowCount(0);
+            countingModel.setRowCount(0);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Lager opdateret og faktura markeret som færdig!",
+                    "Succes",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } catch (DataAccessException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Fejl ved opdatering af fakturastatus: " + ex.getMessage(),
+                    "Fejl",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Fejl ved opdatering af lager: " + ex.getMessage(),
+                    "Fejl",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    
     private void loadInvoice() {
         String text = txtInvoiceNumber.getText().trim();
         if (text.isEmpty()) {

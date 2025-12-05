@@ -89,7 +89,7 @@ public class MenuScreen extends JFrame {
         
         setTitle("Cafe Peace - Lagersystem");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 500);
+        setSize(1600, 1000);
         setLocationRelativeTo(null);
 
         contentPane = new JPanel(new BorderLayout());
@@ -99,16 +99,11 @@ public class MenuScreen extends JFrame {
         
         
         
-        // ---------- TOP PANEL (contains toggle + menu bar) ----------
+     // ---------- TOP PANEL WITHOUT TOGGLE ----------
         JPanel topPanel = new JPanel(new BorderLayout());
 
-        // Toggle button
-        JToggleButton menuToggle = new JToggleButton("Menu ▲");
-        menuToggle.setFocusPainted(false);
-        topPanel.add(menuToggle, BorderLayout.NORTH);
-
-        // Menu bar with "tabs"
-        menuPanel = new JPanel(); // FlowLayout = row of buttons
+        // Top row: the four buttons (menu buttons)
+        menuPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton btnAflagre = new JButton("Aflagre Varer");
         JButton btnIndlagre = new JButton("Indlagre Varer");
         JButton btnLager   = new JButton("Lageroversigt");
@@ -119,15 +114,15 @@ public class MenuScreen extends JFrame {
         menuPanel.add(btnLager);
         menuPanel.add(btnIndkob);
 
-        //Centerpanel med alerts til venstre og menuknapper til højre
-        JPanel centerTop = new JPanel(new BorderLayout());
-        centerTop.add(createAlertsPanel(), BorderLayout.WEST);
-        centerTop.add(menuPanel, BorderLayout.CENTER);
+        // Add button row at the top
+        topPanel.add(menuPanel, BorderLayout.NORTH);
 
-        topPanel.add(centerTop, BorderLayout.CENTER);
-        
-        // Add the whole topPanel once to the NORTH
+        // Second row: alerts
+        topPanel.add(createAlertsPanel(), BorderLayout.CENTER);
+
+        // Add topPanel to window
         contentPane.add(topPanel, BorderLayout.NORTH);
+
 
         // ---------- CENTER AREA WITH SCREENS ----------
         cardLayout = new CardLayout();
@@ -144,15 +139,6 @@ public class MenuScreen extends JFrame {
         btnLager.addActionListener(e -> cardLayout.show(cardPanel, "LAGER"));
         btnIndkob.addActionListener(e -> cardLayout.show(cardPanel, "ORDER"));
 
-        // Toggle menu visibility
-        menuToggle.setSelected(true); // start visible
-        menuToggle.addActionListener(e -> {
-            boolean visible = menuToggle.isSelected();
-            menuPanel.setVisible(visible);
-            menuToggle.setText(visible ? "Menu ▲" : "Menu ▼");
-            topPanel.revalidate();
-            topPanel.repaint();
-        });
     }
     																								// TopMenu Slut.
 
@@ -161,8 +147,8 @@ public class MenuScreen extends JFrame {
     																								//AlertPanel Start.
     private JPanel createAlertsPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(new Dimension(320, 60)); //Infobox størrelse
-        panel.setMinimumSize(new Dimension(320, 60)); //Infobox størrelse
+        panel.setPreferredSize(new Dimension(350, 200)); //Infobox størrelse
+        panel.setMinimumSize(new Dimension(350, 200)); //Infobox størrelse
         panel.setBorder(BorderFactory.createTitledBorder("Alerts"));
 
         alertListModel = new DefaultListModel<>();
@@ -206,31 +192,69 @@ public class MenuScreen extends JFrame {
     private JPanel createIndlagrePanel() {
         JPanel indlagrePanel = new JPanel(new BorderLayout(10, 10));
 
-        // ---------- TOP: Faktura-nummer + knap ----------
-        JPanel top = new JPanel();
+        // ---------- TOP: FÆLLES HEADER-RÆKKE ----------
+        JPanel headerRow = new JPanel(new GridLayout(1, 2, 10, 0)); // venstre/højre side
+
+        // ========== VENSTRE HEADER: "Fakturavarer" + Fakturanr ==========
+        JPanel leftHeader = new JPanel(new BorderLayout());
+        // tiny push to the right
+        leftHeader.setBorder(BorderFactory.createEmptyBorder(0, 7, 0, 0));  
+
+
+        JLabel lblLeftTitle = new JLabel("Fakturavarer");
+        lblLeftTitle.setFont(lblLeftTitle.getFont().deriveFont(16f));
+        // mere til venstre:
+        lblLeftTitle.setHorizontalAlignment(SwingConstants.LEFT);
+        leftHeader.add(lblLeftTitle, BorderLayout.WEST);
+
+        // Fakturanr + tekstfelt + knap på samme linje
+        JPanel invoiceTop = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
         JLabel lblInvoice = new JLabel("Fakturanr:");
         txtInvoiceNumber = new JTextField(10);
         JButton btnLoadInvoice = new JButton("Hent faktura");
 
-        top.add(lblInvoice);
-        top.add(txtInvoiceNumber);
-        top.add(btnLoadInvoice);
+        invoiceTop.add(lblInvoice);
+        invoiceTop.add(txtInvoiceNumber);
+        invoiceTop.add(btnLoadInvoice);
 
-        indlagrePanel.add(top, BorderLayout.NORTH);
+        leftHeader.add(invoiceTop, BorderLayout.EAST);
+
+        // ========== HØJRE HEADER: "Optælling" + Medarbejdernr + Bekræft ==========
+        JPanel rightHeader = new JPanel(new BorderLayout());
+
+        JLabel lblRightTitle = new JLabel("Optælling");
+        lblRightTitle.setFont(lblRightTitle.getFont().deriveFont(16f));
+        lblRightTitle.setHorizontalAlignment(SwingConstants.LEFT); // også venstrestillet
+        rightHeader.add(lblRightTitle, BorderLayout.WEST);
+
+        JButton btnConfirm = new JButton("Bekræft");
+        btnConfirm.setBackground(new Color(0, 170, 0));
+        btnConfirm.setForeground(Color.WHITE);
+        btnConfirm.setFocusPainted(false);
+
+        JPanel btnWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        btnWrapper.setOpaque(false);
+
+        JLabel lblStaff = new JLabel("Medarbejdernr:");
+        txtStaffNumber = new JTextField(8);
+
+        btnWrapper.add(lblStaff);
+        btnWrapper.add(txtStaffNumber);
+        btnWrapper.add(btnConfirm);
+
+        rightHeader.add(btnWrapper, BorderLayout.EAST);
+
+        // læg begge headers i top-rækken
+        headerRow.add(leftHeader);
+        headerRow.add(rightHeader);
+
+        indlagrePanel.add(headerRow, BorderLayout.NORTH);
 
         // ---------- CENTER: To tabeller side om side ----------
         JPanel center = new JPanel(new GridLayout(1, 2, 10, 0)); // 1 række, 2 kolonner
 
-        // ========== VENSTRE: FAKTURAVARER ==========
+        // ========== VENSTRE: FAKTURAVARER (kun tabel nu) ==========
         JPanel invoicePanel = new JPanel(new BorderLayout());
-
-        JPanel leftHeader = new JPanel(new BorderLayout());
-        JLabel lblLeftTitle = new JLabel("Fakturavarer", SwingConstants.CENTER);
-        lblLeftTitle.setFont(lblLeftTitle.getFont().deriveFont(16f));
-        leftHeader.add(lblLeftTitle, BorderLayout.CENTER);
-        // fast højde så venstre og højre header matcher
-        leftHeader.setPreferredSize(new Dimension(1, 40));
-        invoicePanel.add(leftHeader, BorderLayout.NORTH);
 
         String[] invoiceColumns = { "Varenr", "Navn", "Faktura-antal" };
         invoiceModel = new DefaultTableModel(invoiceColumns, 0) {
@@ -242,37 +266,8 @@ public class MenuScreen extends JFrame {
         invoiceTable = new JTable(invoiceModel);
         invoicePanel.add(new JScrollPane(invoiceTable), BorderLayout.CENTER);
 
-        // ========== HØJRE: OPTÆLLING ==========
+        // ========== HØJRE: OPTÆLLING (kun tabel nu) ==========
         JPanel countingPanel = new JPanel(new BorderLayout());
-
-        // Header: titel + medarbejdernr-felt + grøn "Bekræft"-knap
-        JPanel rightHeader = new JPanel(new BorderLayout());
-        JLabel lblRightTitle = new JLabel("Optælling", SwingConstants.CENTER);
-        lblRightTitle.setFont(lblRightTitle.getFont().deriveFont(16f));
-        rightHeader.add(lblRightTitle, BorderLayout.CENTER);
-
-        JButton btnConfirm = new JButton("Bekræft");
-        btnConfirm.setBackground(new Color(0, 180, 0));
-        btnConfirm.setForeground(Color.WHITE);
-        btnConfirm.setFocusPainted(false);
-
-        // Panel til medarbejdernr + knap (samme højde, ingen ændring)
-        JPanel btnWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 7));
-        btnWrapper.setOpaque(false);
-
-        JLabel lblStaff = new JLabel("Medarbejdernr:");
-        txtStaffNumber = new JTextField(8);   // Medarbejdernummer field.
-
-        btnWrapper.add(lblStaff);
-        btnWrapper.add(txtStaffNumber);
-        btnWrapper.add(btnConfirm);
-
-        rightHeader.add(btnWrapper, BorderLayout.EAST);
-
-        // samme faste højde som venstre header
-        rightHeader.setPreferredSize(new Dimension(1, 40));
-
-        countingPanel.add(rightHeader, BorderLayout.NORTH);
 
         String[] countingColumns = { "Varenr", "Navn", "System-antal", "Optalt antal" };
         countingModel = new DefaultTableModel(countingColumns, 0) {
@@ -302,30 +297,26 @@ public class MenuScreen extends JFrame {
         // ---------- Knap-action: Hent faktura ----------
         btnLoadInvoice.addActionListener(e -> loadInvoice());
 
+        // ---------- Bekræft-logik ----------
         btnConfirm.addActionListener(e -> {
             // --- Tjek medarbejdernr først ---
             String staffText = txtStaffNumber.getText().trim();
             if (staffText.isEmpty()) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Indtast et medarbejdernr.",
-                        "Manglende input",
-                        JOptionPane.WARNING_MESSAGE
-                );
+                JOptionPane.showMessageDialog(this,
+                    "Indtast et medarbejdernr.",
+                    "Manglende input",
+                    JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             int staffNumber;
             try {
-                // Checker om staffnummeret er ugyldigt.
-                staffNumber = Integer.parseInt(staffText);
+                staffNumber = Integer.parseInt(staffText); // Checker om staffnummeret er ugyldigt.
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Medarbejdernr skal være et tal.",
-                        "Ugyldigt medarbejdernr",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                JOptionPane.showMessageDialog(this,
+                    "Medarbejdernr skal være et tal.",
+                    "Ugyldigt medarbejdernr",
+                    JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -342,27 +333,23 @@ public class MenuScreen extends JFrame {
                         int countedQty = Integer.parseInt(countedObj.toString());
                         qtyByProductId.put(prodId, countedQty);
                     } catch (NumberFormatException err) {
-                        // Ignorer ugyldige rækker
+                        // ignorér ugyldige rækker
                     }
                 }
             }
 
             try {
                 productCtrl.confirmDeposit(qtyByProductId);
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Lager opdateret med optalte antal for medarbejder " + staffNumber + "!",
-                        "Succes",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                JOptionPane.showMessageDialog(this,
+                    "Lager opdateret med optalte antal for medarbejder " + staffNumber + "!",
+                    "Succes",
+                    JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Fejl ved opdatering af lager: " + ex.getMessage(),
-                        "Fejl",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                JOptionPane.showMessageDialog(this,
+                    "Fejl ved opdatering af lager: " + ex.getMessage(),
+                    "Fejl",
+                    JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -456,11 +443,6 @@ public class MenuScreen extends JFrame {
     @SuppressWarnings("serial")
     private JPanel createAflagrePanel() {
         JPanel aflagerPanel = new JPanel(new BorderLayout(10, 10));
-
-        // TOP: Titel (du kan senere lave søgefelter, dato osv.)
-        JLabel lblTitle = new JLabel("Aflagre varer", SwingConstants.CENTER);
-        lblTitle.setFont(lblTitle.getFont().deriveFont(18f));
-        aflagerPanel.add(lblTitle, BorderLayout.NORTH);
 
         // CENTER: To tabeller side om side (samme idé som Indlagre)
         JPanel center = new JPanel(new GridLayout(1, 2, 10, 0));

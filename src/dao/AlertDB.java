@@ -37,9 +37,8 @@ public class AlertDB implements AlertDBIF {
 	
 	
 	//Henter alerts fra databasen. Sender til UI.
-	private static final String SELECT_RECENT =
-	        "SELECT TOP 10 type, description, severity, timestamp " +
-	        "FROM Alert ORDER BY timestamp DESC";
+	private static final String SELECT_ALL =
+	        "SELECT type, description, severity, timestamp FROM Alert"; // ingen ORDER BY tid
 
 	public List<Alert> getRecentAlerts() throws SQLException {
 	    Connection conn;
@@ -51,13 +50,14 @@ public class AlertDB implements AlertDBIF {
 
 	    List<Alert> alerts = new ArrayList<>();
 
-	    try (PreparedStatement ps = conn.prepareStatement(SELECT_RECENT);
+	    try (PreparedStatement ps = conn.prepareStatement(SELECT_ALL);
 	         ResultSet rs = ps.executeQuery()) {
 
 	        while (rs.next()) {
 	            Alert.Type type = Alert.Type.valueOf(rs.getString("type"));
 	            String description = rs.getString("description");
 	            Alert.Severity severity = Alert.Severity.valueOf(rs.getString("severity"));
+	            // vi bruger stadig timestamp hvis du vil vise det senere, men vi checker ikke “hvornår”
 	            LocalDateTime timestamp = rs.getObject("timestamp", LocalDateTime.class);
 
 	            alerts.add(new Alert(type, description, severity, timestamp));
@@ -65,4 +65,7 @@ public class AlertDB implements AlertDBIF {
 	    }
 	    return alerts;
 	}
+	
+	
+	
 }

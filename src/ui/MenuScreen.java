@@ -21,7 +21,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
@@ -102,6 +101,9 @@ public class MenuScreen extends JFrame {
      // ---------- TOP PANEL WITHOUT TOGGLE ----------
         JPanel topPanel = new JPanel(new BorderLayout());
 
+        // Gør hele topområdet lidt højere (fx 110 px)
+        topPanel.setPreferredSize(new Dimension(0, 250));
+        
         // Top row: the four buttons (menu buttons)
         menuPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton btnAflagre = new JButton("Aflagre Varer");
@@ -147,8 +149,8 @@ public class MenuScreen extends JFrame {
     																								//AlertPanel Start.
     private JPanel createAlertsPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(new Dimension(350, 200)); //Infobox størrelse
-        panel.setMinimumSize(new Dimension(350, 200)); //Infobox størrelse
+        panel.setPreferredSize(new Dimension(400, 80)); //Infobox størrelse
+        panel.setMinimumSize(new Dimension(400, 80));   //Infobox størrelse
         panel.setBorder(BorderFactory.createTitledBorder("Alerts"));
 
         alertListModel = new DefaultListModel<>();
@@ -158,11 +160,15 @@ public class MenuScreen extends JFrame {
         JScrollPane scroll = new JScrollPane(alertList);
         panel.add(scroll, BorderLayout.CENTER);
 
-        //Henter alerts første gang
+        // Henter alerts første gang
         loadAlertsIntoList();
+
+        // 🔁 Tjek databasen hvert 5. sekund – ingen tidslogik, bare reload
+        new javax.swing.Timer(5000, e -> loadAlertsIntoList()).start();
 
         return panel;
     }
+
     
     //Load Alerts
     private void loadAlertsIntoList() {
@@ -171,7 +177,11 @@ public class MenuScreen extends JFrame {
             List<Alert> alerts = alertCtrl.getRecentAlerts();
             for (Alert a : alerts) {
                 
-                String line = "[" + a.getSeverity() + "] " + a.getDescription();
+            	String time = a.getTimestamp() != null 
+            	        ? a.getTimestamp().toLocalTime().withNano(0).toString() 
+            	        : "--:--";
+
+            	String line = "[" + time + "] [" + a.getSeverity() + "] " + a.getDescription();
                 alertListModel.addElement(line);
             }
             if (alerts.isEmpty()) {
@@ -319,7 +329,8 @@ public class MenuScreen extends JFrame {
             return;
         }
 
-        int staffNumber;
+        @SuppressWarnings("unused")
+		int staffNumber;
         try {
             // Checker om staffnummeret er ugyldigt.
             staffNumber = Integer.parseInt(staffText);

@@ -23,7 +23,7 @@ public class StockDB implements StockDBIF {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return buildStockFromResultSet(rs);
+                return buildObject(rs);
             } else {
                 return null; // eller kast en custom exception
             }
@@ -48,7 +48,7 @@ public class StockDB implements StockDBIF {
         }
     }
 
-    private Stock buildStockFromResultSet(ResultSet rs) throws SQLException {
+    private Stock buildObject(ResultSet rs) throws SQLException {
         int stockId   = rs.getInt("stockId");
         int productId = rs.getInt("product_FK");
         int amount    = rs.getInt("amount");

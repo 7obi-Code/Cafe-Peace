@@ -120,11 +120,10 @@ public class ProductDB implements ProductDBIF {
                         break;
                 }
 
-                if (fullAssociation && product != null) {
-                    int productId = rs.getInt("productId");
+                if (fullAssociation) {
                     Supplier supplier = supplierDB.findSupplierByPhone(rs.getString("supPhone_FK"), false);
                     product.setSupplier(supplier);
-                    Stock stock = stockDB.findStockByProductId(productId);
+                    Stock stock = stockDB.findStockByProductId(rs.getInt("productId"));
                     product.setStock(stock);
                 }
 

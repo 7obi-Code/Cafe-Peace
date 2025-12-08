@@ -174,7 +174,7 @@ public class MenuScreen extends JFrame {
     private void loadAlertsIntoList() {
         alertListModel.clear();
         try {
-            List<Alert> alerts = alertCtrl.getRecentAlerts();
+            List<Alert> alerts = productCtrl.getRecentAlerts();
             for (Alert a : alerts) {
                 
             	String time = a.getTimestamp() != null 

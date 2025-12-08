@@ -1,5 +1,6 @@
 package controllers;
 
+import modules.Alert;
 import modules.Invoice;
 import modules.InvoiceLine;
 import modules.Product;
@@ -9,6 +10,7 @@ import dao.DataAccessException;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -54,6 +56,10 @@ public class ProductCtrl {
 	        Product p = productDB.findProductById(productId, true);
 	        alertCtrl.checkMaxStock(p);
 	    }
+	}
+	
+	public List<Alert> getRecentAlerts() throws DataAccessException 	{
+		return alertCtrl.getRecentAlerts();
 	}
 }
 

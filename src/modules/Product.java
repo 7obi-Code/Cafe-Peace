@@ -1,6 +1,6 @@
 package modules;
 
-public class Product {
+public abstract class Product {
     private int productId;
     private String name;
     private int minStock;

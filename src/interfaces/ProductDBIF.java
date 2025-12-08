@@ -1,7 +1,7 @@
 package interfaces;
 
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.HashMap;
 
 import dao.DataAccessException;
 import modules.Product;
@@ -13,6 +13,6 @@ public interface ProductDBIF {
 	Product findProductById(int productId, boolean fullAssociation) throws SQLException, DataAccessException;
 
 	//Opdater lageret udfra ændringer per produktId, et map med det nye samlet antal produkt returneres 
-	void updateStock(Map<Integer, Integer> qtyByProductId) throws DataAccessException;
+	void updateStock(HashMap<Integer, Integer> qtyByProductId) throws DataAccessException;
 
 }

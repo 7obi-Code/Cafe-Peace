@@ -48,7 +48,7 @@ public class ProductCtrl {
 	        throw new IllegalStateException("Der er ikke indlæst en faktura endnu.");
 	    }
 
-	    productDB.updateStock(countedQtyByProductId);
+	    productDB.updateStockDeposit(countedQtyByProductId);
 	    
 	    alertCtrl.checkDepositMatchInvoice(currentInvoice, countedQtyByProductId);
 	    

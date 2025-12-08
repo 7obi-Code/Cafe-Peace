@@ -13,6 +13,6 @@ public interface ProductDBIF {
 	Product findProductById(int productId, boolean fullAssociation) throws SQLException, DataAccessException;
 
 	//Opdater lageret udfra ændringer per produktId, et map med det nye samlet antal produkt returneres 
-	void updateStock(HashMap<Integer, Integer> qtyByProductId) throws DataAccessException;
+	void updateStockDeposit(HashMap<Integer, Integer> qtyByProductId) throws DataAccessException;
 
 }

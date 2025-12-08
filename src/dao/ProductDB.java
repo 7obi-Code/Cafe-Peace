@@ -49,7 +49,7 @@ public class ProductDB implements ProductDBIF {
     //updateStock der laver en ny Stock til de produkter der er blevet opdateret ud fra hvad brugeren skrev i UI
     //Dette er lavet som transaction, da det hele gerne skal ske i et hug så noget ikke bliver opdateret uden andet ikke gør.
     @Override
-    public void updateStock(HashMap<Integer, Integer> addedQtyToProductId) throws DataAccessException {
+    public void updateStockDeposit(HashMap<Integer, Integer> addedQtyToProductId) throws DataAccessException {
     	
         HashMap<Product, Integer> result = new HashMap<>();
         Connection connection = DBConnection.getInstance().getConnection();

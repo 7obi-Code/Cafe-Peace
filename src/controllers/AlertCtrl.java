@@ -30,26 +30,29 @@ public class AlertCtrl {
 
 	//Checker om produkt er ramt lavt stock, og kaster en advarsel når den er ramt minimum stock
 	
-	/*/public boolean checkMinStock(Product p, int newQty) throws SQLException {
-	    if (newQty <= p.getMinStock()) {
-	        createAlert(Alert.Type.LOW_STOCK, 
-	                    p.getName() + " er nået lavt lager.", 
+	public boolean checkMinStock(Product p) throws DataAccessException {
+	    try	{
+			if (p.getStock().getAmount() < p.getMinStock()) {
+				createAlert(Alert.Type.LOW_STOCK, 
+						p.getName() + " er nået lavt lager.", 
 	                    Alert.Severity.HØJ,
-	                    LocalDateTime.now(), product);
+	                    LocalDateTime.now(), p);
 	        return true;
 	    }
 	    return false;
-	} /*/
+	    } catch (SQLException e)	{
+	    	throw new DataAccessException("Kunne ikke checke MinStock", e);
+	    }
+	} 
 
 	//Checker om produkt er ramt maximum stock, og kaster en advarsel hvis den er ramt maximum stock
 	public boolean checkMaxStock(Product p) throws DataAccessException {
 		try	{
-			Product product = p;
-			if (product.getStock().getAmount() > product.getMaxStock()) {
+			if (p.getStock().getAmount() > p.getMaxStock()) {
 			createAlert(Alert.Type.MAX_STOCK, 
-					product.getName() + " er nået grænsen for lager.",
+					p.getName() + " er nået max grænsen for lager.",
 					Alert.Severity.LAV,
-					LocalDateTime.now(), product);
+					LocalDateTime.now(), p);
 				return true;
 				}
 			return false;

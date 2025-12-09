@@ -15,7 +15,7 @@ public class InvoiceDB implements InvoiceDBIF {
 	private ProductDB productDB;
 	
 	private static final String SELECT_ALL_INVOICES = 
-			"SELECT invoiceNo, supPhone_FK, status, alert_FK, staff_FK FROM Invoice";
+			"SELECT invoiceNo, supPhone_FK, status, staff_FK FROM Invoice";
 	
 	private static final String SELECT_BY_INVOICENO = SELECT_ALL_INVOICES + " WHERE invoiceNo = ?";
 	

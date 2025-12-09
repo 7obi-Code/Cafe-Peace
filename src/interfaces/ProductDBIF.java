@@ -15,4 +15,6 @@ public interface ProductDBIF {
 	//Opdater lageret udfra ændringer per produktId, et map med det nye samlet antal produkt returneres 
 	void updateStockDeposit(HashMap<Integer, Integer> qtyByProductId) throws DataAccessException;
 
+	void updateStockWithdraw(Product product, int withdrawQty) throws DataAccessException;
+
 }

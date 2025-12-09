@@ -51,7 +51,6 @@ public class ProductDB implements ProductDBIF {
     @Override
     public void updateStockDeposit(HashMap<Integer, Integer> addedQtyToProductId) throws DataAccessException {
     	
-        HashMap<Product, Integer> result = new HashMap<>();
         Connection connection = DBConnection.getInstance().getConnection();
         
         try	{
@@ -69,9 +68,6 @@ public class ProductDB implements ProductDBIF {
             // Create new stock for a product
             stockDB.createStock(productId, newAmount, LocalDateTime.now());
 
-            Product product = findProductById(productId, true);
-
-            result.put(product, newAmount);
         }
         
         connection.commit();
@@ -87,6 +83,18 @@ public class ProductDB implements ProductDBIF {
                 }
         	}
         }
+    }
+    
+    public void updateStockWithdraw(Product product, int withdrawQty) throws DataAccessException	{
+    	try {
+    		int productId = product.getProductId();
+    		int newAmount = product.getStock().getAmount() + withdrawQty;
+    		
+    		stockDB.createStock(productId, newAmount, LocalDateTime.now());
+    		
+    	} catch (SQLException e)	{
+    		throw new DataAccessException("Kunne ikke opdatere produktets stock ved withdraw", e);
+    	}
     }
     
     @Override

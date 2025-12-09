@@ -91,7 +91,7 @@ public class ProductDB implements ProductDBIF {
     public void updateStockWithdraw(Product product, int withdrawQty) throws DataAccessException	{
     	try {
     		int productId = product.getProductId();
-    		int newAmount = product.getStock().getAmount() + withdrawQty;
+    		int newAmount = product.getStock().getAmount() - withdrawQty;
     		
     		stockDB.createStock(productId, newAmount, LocalDateTime.now());
     		

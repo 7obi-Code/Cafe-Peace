@@ -8,52 +8,50 @@ import java.time.LocalDateTime;
 
 public class StockDB implements StockDBIF {
 
-    private static final String SELECT_BY_PRODUCTID =
-        "SELECT TOP 1 * FROM Stock WHERE product_FK = ? ORDER BY timestamp DESC";
+	private static final String SELECT_BY_PRODUCTID = "SELECT TOP 1 * FROM Stock WHERE product_FK = ? ORDER BY timestamp DESC";
 
-    private static final String INSERT_STOCK =
-        "INSERT INTO Stock (amount, product_FK, staff_FK, timestamp) VALUES (?, ?, ?, ?)";
+	private static final String INSERT_STOCK = "INSERT INTO Stock (amount, product_FK, staff_FK, timestamp) VALUES (?, ?, ?, ?)";
 
-    @Override
-    public Stock findStockByProductId(int productId) throws SQLException, DataAccessException {
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-            PreparedStatement ps = conn.prepareStatement(SELECT_BY_PRODUCTID);
-            ps.setInt(1, productId);
-            ResultSet rs = ps.executeQuery();
+	@Override
+	public Stock findStockByProductId(int productId) throws SQLException, DataAccessException {
+		try {
+			Connection conn = DBConnection.getInstance().getConnection();
+			PreparedStatement ps = conn.prepareStatement(SELECT_BY_PRODUCTID);
+			ps.setInt(1, productId);
+			ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                return buildObject(rs);
-            } else {
-                return null; // eller kast en custom exception
-            }
-        } catch (SQLException e) {
-            throw e;
-        }
-    }
+			if (rs.next()) {
+				return buildObject(rs);
+			} else {
+				return null; // eller kast en custom exception
+			}
+		} catch (SQLException e) {
+			throw e;
+		}
+	}
 
-    @Override
-    public void createStock(int productId, int amount, LocalDateTime timestamp)
-            throws SQLException, DataAccessException {
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-            PreparedStatement ps = conn.prepareStatement(INSERT_STOCK);
-            ps.setInt(1, amount);
-            ps.setInt(2, productId);
-            ps.setInt(3, 1001);
-            ps.setObject(4, timestamp);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw e;
-        }
-    }
+	@Override
+	public void createStock(int productId, int amount, LocalDateTime timestamp)
+			throws SQLException, DataAccessException {
+		try {
+			Connection conn = DBConnection.getInstance().getConnection();
+			PreparedStatement ps = conn.prepareStatement(INSERT_STOCK);
+			ps.setInt(1, amount);
+			ps.setInt(2, productId);
+			ps.setInt(3, 1001);
+			ps.setObject(4, timestamp);
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			throw e;
+		}
+	}
 
-    private Stock buildObject(ResultSet rs) throws SQLException {
-        int stockId   = rs.getInt("stockId");
-        int productId = rs.getInt("product_FK");
-        int amount    = rs.getInt("amount");
-        LocalDateTime timestamp = rs.getObject("timestamp", LocalDateTime.class);
+	private Stock buildObject(ResultSet rs) throws SQLException {
+		int stockId = rs.getInt("stockId");
+		int productId = rs.getInt("product_FK");
+		int amount = rs.getInt("amount");
+		LocalDateTime timestamp = rs.getObject("timestamp", LocalDateTime.class);
 
-        return new Stock(stockId, productId, amount, timestamp);
-    }
+		return new Stock(stockId, productId, amount, timestamp);
+	}
 }

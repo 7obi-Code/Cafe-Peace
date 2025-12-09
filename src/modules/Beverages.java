@@ -1,9 +1,9 @@
 package modules;
 
 public class Beverages extends Product {
-    private boolean hasSugar;
-    private String size;
-    
+	private boolean hasSugar;
+	private String size;
+
 	public Beverages(int productId, String name, int minStock, int maxStock, String expiryDate, String unit,
 			String prodType, boolean hasSugar, String size) {
 		super(productId, name, minStock, maxStock, expiryDate, unit, prodType);

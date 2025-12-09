@@ -59,14 +59,15 @@ public class ProductCtrl {
 	    }
 	}
 	
-	public void confirmWithdraw(Product product, int withdrawQty) throws DataAccessException {
+	public void confirmWithdraw(Product product, int withdrawQty) throws Exception {
 		if (product == null)	{
 			throw new IllegalStateException("Der er ikke indlæst et produkt endnu.");
 		}
 		
 		productDB.updateStockWithdraw(product, withdrawQty) ;
 		
-		alertCtrl.checkMinStock(product);
+		Product p = productDB.findProductById(product.getProductId(), true);
+		alertCtrl.checkMinStock(p);
 	}
 	
 	public ArrayList<Product> getAllProducts() throws DataAccessException {

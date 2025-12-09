@@ -1,6 +1,8 @@
 package ui;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
+import controllers.ProductCtrl;
 import dao.DataAccessException;
 import dao.ProductDB;
 import interfaces.ProductDBIF;
@@ -11,25 +13,40 @@ public class TestDBConnection {
 	
     @SuppressWarnings("unused")
 	public static void main(String[] args) throws DataAccessException, SQLException {
-    	ProductDBIF productDB = new ProductDB();
-        int productId = 1;
-    	Product p = productDB.findProductById(1, true);
+    	ProductCtrl productCtrl = new ProductCtrl();
 
+        System.out.println("Loading all products...\n");
 
-        // Print product & supplier details
-        System.out.println("Product Details:");
-        System.out.println("ID: " + p.getProductId());
-        System.out.println("Name: " + p.getName());
-        System.out.println("Supplier: " + (p.getSupplier() != null ? p.getSupplier().getName() : "None"));
+        ArrayList<Product> products = productCtrl.getAllProducts();
 
-        System.out.println("\nFull product object:");
-        System.out.println(p);
+        if (products.isEmpty()) {
+            System.out.println("No products found in database.");
+            return;
+        }
 
-        System.out.println("\nSupplier Details:");
-        System.out.println("Name: " + p.getSupplier().getName());
-        System.out.println("Phone: " + p.getSupplier().getPhone());
-        System.out.println("Email: " + p.getSupplier().getEmail());
+        for (Product p : products) {
+            System.out.println("-------------------------------------------------");
+            System.out.println("Product ID: " + p.getProductId());
+            System.out.println("Name: " + p.getName());
+            System.out.println("Type: " + p.getProdType());
 
-        System.out.println("Amount: " + p.getStock().getAmount());
+            if (p.getSupplier() != null) {
+                System.out.println("Supplier: " + p.getSupplier().getName() +
+                                   " (" + p.getSupplier().getPhone() + ")");
+            } else {
+                System.out.println("Supplier: None");
+            }
+
+            if (p.getStock() != null) {
+                System.out.println("Stock Amount: " + p.getStock().getAmount());
+            } else {
+                System.out.println("Stock: None");
+            }
+
+            System.out.println("Full object:");
+            System.out.println(p);
+        }
+
+        System.out.println("\nDone.");
     }
 }

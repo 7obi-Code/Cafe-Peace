@@ -9,6 +9,7 @@ import dao.ProductDB;
 import dao.DataAccessException;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,11 @@ public class ProductCtrl {
 		
 		alertCtrl.checkMinStock(product);
 	}
-
+	
+	public ArrayList<Product> getAllProducts() throws DataAccessException {
+		return productDB.getAllProducts();
+	}
+	
 	public List<Alert> getRecentAlerts() throws DataAccessException 	{
 		return alertCtrl.getRecentAlerts();
 	}

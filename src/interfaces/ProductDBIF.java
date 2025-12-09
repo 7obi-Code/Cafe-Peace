@@ -1,6 +1,7 @@
 package interfaces;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import dao.DataAccessException;
@@ -16,5 +17,6 @@ public interface ProductDBIF {
 	void updateStockDeposit(HashMap<Integer, Integer> qtyByProductId) throws DataAccessException;
 
 	void updateStockWithdraw(Product product, int withdrawQty) throws DataAccessException;
-
+	
+	ArrayList<Product> getAllProducts() throws DataAccessException;
 }

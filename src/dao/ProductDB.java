@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,12 +36,14 @@ public class ProductDB implements ProductDBIF {
         SELECT_ALL_PRODUCTS_WITH_TYPE_INFO + " WHERE p.productId = ?";
 
     private PreparedStatement selectById;
+    private PreparedStatement selectAllProducts;
 
     public ProductDB() throws DataAccessException {
         this.stockDB = new StockDB();
         this.supplierDB = new SupplierDB();
         try {
             selectById = DBConnection.getInstance().getConnection().prepareStatement(SELECT_BY_ID);
+            selectAllProducts = DBConnection.getInstance().getConnection().prepareStatement(SELECT_ALL_PRODUCTS_WITH_TYPE_INFO);
         } catch (SQLException e) {
             throw new DataAccessException("Could not prepare statement for ProductDB", e);
         }
@@ -102,15 +105,31 @@ public class ProductDB implements ProductDBIF {
         try {
             selectById.setInt(1, productId);
             ResultSet rs = selectById.executeQuery();
-            return buildObject(rs, fullAssociation);
+            if (rs.next())	{
+            	return buildObject(rs, fullAssociation);
+            }
         } catch (SQLException e) {
             throw new DataAccessException("Could not find parameter or select product by ID", e);
         }
+        return null;
+    }
+    
+    public ArrayList<Product> getAllProducts() throws DataAccessException	{
+    	ArrayList<Product> products = new ArrayList<>();
+    	try	{
+    		ResultSet rs = selectAllProducts.executeQuery();
+    		while (rs.next())	{
+    			products.add(buildObject(rs, true));
+    		}
+    	} catch (SQLException e)	{
+    		throw new DataAccessException("Kunne ikke finde alle produkterne", e);
+    	}
+    	
+    	return products;
     }
 
     private Product buildObject(ResultSet rs, boolean fullAssociation) throws DataAccessException {
         try {
-            if (rs.next()) {
                 String prodType = rs.getString("prodType");
                 Product product = null;
                 switch (prodType) {
@@ -136,11 +155,10 @@ public class ProductDB implements ProductDBIF {
                 }
 
                 return product;
-            }
+
         } catch (SQLException e) {
             throw new DataAccessException("Could not read result set for Product", e);
         }
-        return null;
     }
 
     private Produce buildProduce(ResultSet rs) throws DataAccessException {

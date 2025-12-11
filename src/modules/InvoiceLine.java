@@ -3,8 +3,8 @@ package modules;
 public class InvoiceLine {
 	private int quantity;
 	private Product product;
-	
-	public InvoiceLine(int quantity, Product product)	{
+
+	public InvoiceLine(int quantity, Product product) {
 		this.quantity = quantity;
 		this.product = product;
 	}
@@ -24,5 +24,5 @@ public class InvoiceLine {
 	public void setProduct(Product product) {
 		this.product = product;
 	}
-	
+
 }

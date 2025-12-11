@@ -1,26 +1,27 @@
 package modules;
 
 public abstract class Product {
-    private int productId;
-    private String name;
-    private int minStock;
-    private int maxStock;
-    private String expiryDate;
-    private String unit;
-    private String prodType;
-    private Supplier supplier;
-    private Stock stock;
-    private int alertId;
+	private int productId;
+	private String name;
+	private int minStock;
+	private int maxStock;
+	private String expiryDate;
+	private String unit;
+	private String prodType;
+	private Supplier supplier;
+	private Stock stock;
+	private int alertId;
 
-    public Product(int productId, String name, int minStock, int maxStock, String expiryDate, String unit, String prodType) {
-        this.productId = productId;
-        this.name = name;
-        this.minStock = minStock;
-        this.maxStock = maxStock;
-        this.expiryDate = expiryDate;
-        this.unit = unit;
-        this.prodType = prodType;
-    }
+	public Product(int productId, String name, int minStock, int maxStock, String expiryDate, String unit,
+			String prodType) {
+		this.productId = productId;
+		this.name = name;
+		this.minStock = minStock;
+		this.maxStock = maxStock;
+		this.expiryDate = expiryDate;
+		this.unit = unit;
+		this.prodType = prodType;
+	}
 
 	public int getProductId() {
 		return productId;
@@ -53,7 +54,7 @@ public abstract class Product {
 	public void setMaxStock(int maxStock) {
 		this.maxStock = maxStock;
 	}
-	
+
 	public Stock getStock() {
 		return stock;
 	}
@@ -101,5 +102,5 @@ public abstract class Product {
 	public void setAlertId(int alertId) {
 		this.alertId = alertId;
 	}
-    
+
 }

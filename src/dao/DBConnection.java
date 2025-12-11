@@ -2,13 +2,13 @@ package dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException; 
+import java.sql.SQLException;
 
 public class DBConnection {
 
-	private static DBConnection uniqueInstance; 	
+	private static DBConnection uniqueInstance;
 	private Connection connection = null; // the connection to the database
-	
+
 	private static final String DBNAME = "DMA-CSD-V252_10666009";
 	private static final String SERVERNAME = "hildur.ucn.dk";
 	private static final String PORTNUMBER = "1433";
@@ -16,8 +16,9 @@ public class DBConnection {
 	private static final String PASSWORD = "Password1!";
 
 	private DBConnection() throws DataAccessException {
-		String urlString = String.format("jdbc:sqlserver://%s:%s;databaseName=%s;encrypt=true;trustServerCertificate=true", SERVERNAME, PORTNUMBER,
-				DBNAME);
+		String urlString = String.format(
+				"jdbc:sqlserver://%s:%s;databaseName=%s;encrypt=true;trustServerCertificate=true", SERVERNAME,
+				PORTNUMBER, DBNAME);
 		try {
 			connection = DriverManager.getConnection(urlString, USERNAME, PASSWORD);
 		} catch (SQLException e) {
@@ -36,6 +37,5 @@ public class DBConnection {
 	public Connection getConnection() {
 		return connection;
 	}
-
 
 }

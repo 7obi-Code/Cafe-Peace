@@ -8,7 +8,7 @@ import modules.Product;
 
 public interface AlertDBIF {
 	Alert createAlert(Alert alert, Product product) throws SQLException;
-	
-	//Alert lsit til UI.
+
+	// Alert lsit til UI.
 	List<Alert> getRecentAlerts() throws SQLException;
 }

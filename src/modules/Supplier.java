@@ -6,7 +6,7 @@ public class Supplier {
 	private int addressId;
 	private String email;
 	private int cvr;
-	
+
 	public Supplier(String phone, String name, int addressId, String email, int cvr) {
 		super();
 		this.phone = phone;
@@ -55,6 +55,5 @@ public class Supplier {
 	public void setCvr(int cvr) {
 		this.cvr = cvr;
 	}
-	
-	
+
 }

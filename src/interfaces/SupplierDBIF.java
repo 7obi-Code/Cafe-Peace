@@ -1,4 +1,5 @@
 package interfaces;
+
 import dao.DataAccessException;
 import modules.Supplier;
 

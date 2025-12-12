@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -25,8 +26,10 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.table.DefaultTableModel;
 
+import Utilities.UserThread;
 import controllers.AlertCtrl;
 import controllers.InvoiceCtrl;
 import controllers.ProductCtrl;
@@ -90,6 +93,12 @@ public class MenuScreen extends JFrame {
 		this.invoiceCtrl = new InvoiceCtrl();
 		this.productCtrl = new ProductCtrl();
 		this.alertCtrl = new AlertCtrl();
+
+		new UserThread(this.productCtrl, "Jakob").start();
+		new UserThread(this.productCtrl, "Jonas").start();
+		new UserThread(this.productCtrl, "Noah").start();
+		new UserThread(this.productCtrl, "Tobias").start();
+		new UserThread(this.productCtrl, "Lasse").start();
 
 		setTitle("Cafe Peace - Lagersystem");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -168,6 +177,10 @@ public class MenuScreen extends JFrame {
 		new javax.swing.Timer(5000, e -> loadAlertsIntoList()).start();
 
 		return panel;
+	}
+	
+	private void LoadLambda(ActionEvent e) {
+		
 	}
 
 	// Load Alerts

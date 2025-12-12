@@ -27,7 +27,6 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 
-import controllers.AlertCtrl;
 import controllers.InvoiceCtrl;
 import controllers.ProductCtrl;
 import dao.DataAccessException;
@@ -64,8 +63,6 @@ public class MenuScreen extends JFrame {
 	// Kode implementering fields
 	private final InvoiceCtrl invoiceCtrl;
 	private final ProductCtrl productCtrl;
-	@SuppressWarnings("unused")
-	private final AlertCtrl alertCtrl;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(() -> {
@@ -89,7 +86,6 @@ public class MenuScreen extends JFrame {
 	public MenuScreen() throws DataAccessException {
 		this.invoiceCtrl = new InvoiceCtrl();
 		this.productCtrl = new ProductCtrl();
-		this.alertCtrl = new AlertCtrl();
 
 		setTitle("Cafe Peace - Lagersystem");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -18,8 +18,10 @@ class TestCaseStockBoundary {
 	void test1() throws Exception {
 		// Arrange
 		AlertCtrl alertCtrl = new AlertCtrl();
+										//100 ER MAX STOCK PÅ PRODUKTET
 		Product p = new Beverages(1000, "Banana", 10, 100, "101010", ".",
 				"Beverage", false, "large");
+					            //101 GÅR OVER MAKS STOCK
 		Stock stock = new Stock(10, 1000, 101, LocalDateTime.now());
 		p.setStock(stock);
 		
@@ -36,6 +38,7 @@ class TestCaseStockBoundary {
 		AlertCtrl alertCtrl = new AlertCtrl();
 		Product p = new Beverages(1000, "Banana", 10, 100, "101010", ".",
 				"Beverage", false, "large");
+		                      //100 GÅR IKKE OVER MAKS STOCK
 		Stock stock = new Stock(10, 1000, 100, LocalDateTime.now());
 		p.setStock(stock);
 		

@@ -11,10 +11,8 @@ import interfaces.ProductDBIF;
 import modules.Alert;
 import modules.Invoice;
 import modules.Product;
-import modules.StockService;
 
 public class ProductCtrl {
-	private final StockService stockService;
 	private final InvoiceCtrl invoiceCtrl;
 	private final AlertCtrl alertCtrl;
 	private final ProductDBIF productDB;
@@ -24,7 +22,6 @@ public class ProductCtrl {
 		this.invoiceCtrl = new InvoiceCtrl();
 		this.alertCtrl = new AlertCtrl();
 		this.productDB = new ProductDB();
-		this.stockService = new StockService();
 	}
 
 	public Product findProductById(int productId) throws DataAccessException {
@@ -59,12 +56,15 @@ public class ProductCtrl {
 		}
 	}
 
-	public void confirmWithdraw(int productId, int withdrawQty, String username) throws Exception {
-		stockService.Withdraw(productId, withdrawQty, username);
-	}
-
 	public void confirmWithdraw(Product product, int withdrawQty) throws Exception {
-		stockService.Withdraw(product.getProductId(), withdrawQty, "Username"); // TODO: Det her er ikke smukt.
+		if (product == null)	{
+			throw new IllegalStateException("Der er ikke indlæst et produkt endnu.");
+		}
+		
+		productDB.updateStockWithdraw(product, withdrawQty) ;
+		
+		Product p = productDB.findProductById(product.getProductId(), true);
+		alertCtrl.checkMinStock(p);
 	}
 
 	public ArrayList<Product> getAllProducts() throws DataAccessException {

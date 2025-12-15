@@ -191,7 +191,6 @@ public class MenuScreen extends JFrame {
 	// AlertPanel Slut.
 
 	// IndlagrePanel Start.
-	@SuppressWarnings("serial")
 	private JPanel createIndlagrePanel() {
 		JPanel indlagrePanel = new JPanel(new BorderLayout(10, 10));
 
@@ -437,7 +436,6 @@ public class MenuScreen extends JFrame {
 	// LoadInvoice Slut.
 
 	// AflagerPanel Start.
-	@SuppressWarnings("serial")
 	private JPanel createAflagrePanel() {
 		JPanel aflagerPanel = new JPanel(new BorderLayout(10, 10));
 
